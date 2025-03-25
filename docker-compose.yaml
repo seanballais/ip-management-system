@@ -1,12 +1,12 @@
 services:
   auth:
     build:
-      context: auth
+      context: services/auth
       dockerfile: Dockerfile
     volumes:
       - ./auth/:/app
     env_file:
-      - auth/env/db.env
+      - services/auth/env/db.env
     command: fastapi dev src/main.py --host 0.0.0.0 --port 8080
     ports:
       - "8081:8080"
@@ -22,9 +22,9 @@ services:
     volumes:
       - auth-db-data:/var/lib/postgresql/data
     expose:
-      - 5433
+      - ${DATABASE_PORT}
     env_file:
-      - auth/env/db.env
+      - services/auth/env/db.env
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
