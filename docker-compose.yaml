@@ -24,11 +24,7 @@ services:
     expose:
       - 5433
     env_file:
-      - services/auth/env/db.env
-    environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      - docker/auth.db.env
 volumes:
   auth-db-data:
 networks:
