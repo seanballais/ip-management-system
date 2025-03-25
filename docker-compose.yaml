@@ -4,7 +4,7 @@ services:
       context: services/auth
       dockerfile: Dockerfile
     volumes:
-      - ./auth/:/app
+      - ./services/auth/:/app
     env_file:
       - services/auth/env/db.env
     command: fastapi dev src/main.py --host 0.0.0.0 --port 8080
@@ -21,8 +21,8 @@ services:
     image: postgres:17-alpine
     volumes:
       - auth-db-data:/var/lib/postgresql/data
-    expose:
-      - 5433
+    ports:
+      - "5433:5432"
     env_file:
       - docker/auth.db.env
 volumes:
