@@ -3,7 +3,11 @@ services:
     build:
       context: auth
       dockerfile: Dockerfile
-    command: uvicorn src.main:app --host 0.0.0.0  --port 8080
+    volumes:
+      - ./auth/:/app
+    env_file:
+      - auth/env/db.env
+    command: fastapi dev src/main.py --host 0.0.0.0 --port 8080
     ports:
       - "8081:8080"
     networks:
@@ -21,6 +25,10 @@ services:
       - 5433
     env_file:
       - auth/env/db.env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
 volumes:
   auth-db-data:
 networks:
