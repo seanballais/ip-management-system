@@ -22,13 +22,13 @@ services:
     volumes:
       - auth-db-data:/var/lib/postgresql/data
     expose:
-      - ${DATABASE_PORT}
+      - 5433
     env_file:
       - services/auth/env/db.env
     environment:
+      POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
 volumes:
   auth-db-data:
 networks:

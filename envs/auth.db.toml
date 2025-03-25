@@ -1,0 +1,40 @@
+# Specifies the path where the env file that a service will use will be
+# generated to.
+target_path = "services/auth/env/db.env"
+
+# Specifies the path where the env file that will be used by Docker will be
+# generated to.
+target_path_docker = "docker/auth.db.env"
+
+# Each TOML table represents an environment variable. The table name
+# will be converted into uppercase in the final env file.
+# DATABASE_SCHEME=postgresql
+# DATABASE_HOST=localhost
+# DATABASE_PORT=5433
+# DATABASE_NAME=auth_db
+# DATABASE_USER=auth_user
+# DATABASE_PASSWORD=auth_user_12345
+[database_scheme]
+value = "postgresql" # The value of the environment variable.
+
+[database_host]
+value = "localhost"
+
+[database_port]
+value = 5433
+
+[database_name]
+value = "auth_db"
+
+# The variable name that will be used for this environment variable in the
+# env file that will be used by Docker. We may write it here in any case, as
+# the environment file will always have the name in uppercase.
+docker_var_name = "postgres_db"
+
+[database_user]
+value = "auth_user"
+docker_var_name = "postgres_user"
+
+[database_password]
+value = "auth_user_12345"
+docker_var_name = "postgres_password"
