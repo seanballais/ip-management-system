@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
@@ -8,11 +10,9 @@ from .security import (
     create_access_token,
     create_refresh_token,
     is_password_correct,
-    is_token_well_formed,
-    JWT_ALGORITHM,
-    SECRET_KEY
+    is_token_well_formed
 )
-from .schema import LoginData, LogoutData, RegistrationData
+from .schema import LoginData, LogoutData, RegistrationData, UsersData
 
 
 router: APIRouter = APIRouter()
@@ -92,6 +92,14 @@ async def logout(data: LogoutData, session: Session = Depends(get_session)):
             'success': True
         }
     }
+
+@router.get('/users')
+async def users(data: UsersData,
+                user_id: Annotated[list[int] | None, Query(alias='id')] = None):
+    print(data)
+    print(user_id)
+
+    return {}
 
 
 def _get_user_tokens(user_data: dict) -> dict:

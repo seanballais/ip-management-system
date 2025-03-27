@@ -15,3 +15,7 @@ class LoginData(BaseModel):
 class LogoutData(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class UsersData(BaseModel):
+    access_token: str
