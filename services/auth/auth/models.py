@@ -16,7 +16,10 @@ class User(SQLModel, table=True):
 def create_user(username: str,
                 raw_password: str,
                 is_superuser: bool,
-                session: Session = next(get_session())) -> User:
+                session: Session | None = None) -> User:
+    if session is None:
+        session: Session = next(get_session())
+
     hashed_password: str = hash_password(raw_password)
     user: User = User(username=username,
                       password=hashed_password,
@@ -25,3 +28,11 @@ def create_user(username: str,
     session.commit()
 
     return user
+
+
+def get_user_dict(user: User) -> dict:
+    return {
+        'id': user.id,
+        'username': user.username,
+        'is_superuser': user.is_superuser
+    }
