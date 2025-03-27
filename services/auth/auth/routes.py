@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import Session
 
+from .db import get_session
+from .models import User, create_user
 
-from .security import hash_password, verify_password
 
 router: APIRouter = APIRouter()
 
@@ -14,7 +17,7 @@ class Registration(BaseModel):
 
 
 @router.put('/register')
-async def register(data: Registration):
+async def register(data: Registration, session: Session=Depends(get_session)):
     if data.password1 != data.password2:
         raise HTTPException(
             status_code=422,
@@ -27,19 +30,26 @@ async def register(data: Registration):
             }
         )
 
-    hashed_password: str = hash_password(data.password1)
-    is_password_correct: bool = verify_password(data.password1, hashed_password)
-
-    print('Raw Password:', data.password1)
-    print('Hashed Password:', hashed_password)
-    print('Is password correct?', is_password_correct)
+    try:
+        user: User = create_user(data.username, data.password1, False, session)
+    except IntegrityError:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                'errors': [
+                    {
+                        'code': 'unavailable_username'
+                    }
+                ]
+            }
+        )
 
     return {
         'data': {
             'user': {
-                'id': 'TBD ID',
-                'username': data.username,
-                'is_superuser': 'TBD superuser'
+                'id': user.id,
+                'username': user.username,
+                'is_superuser': user.is_superuser
             },
             'authorization': {
                 'access_token': '<access_token>',
