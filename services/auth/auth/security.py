@@ -27,6 +27,12 @@ def create_access_token(data: dict) -> str:
     return create_jwt_token(data, expires_delta)
 
 
+def create_refresh_token(data: dict) -> str:
+    ttl: int = settings.refresh_token_minutes_ttl
+    expires_delta: timedelta = timedelta(minutes=ttl)
+    return create_jwt_token(data, expires_delta)
+
+
 # Taken from: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
 def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
     encoded_data = data.copy()
