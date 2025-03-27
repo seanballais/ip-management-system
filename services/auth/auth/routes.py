@@ -1,28 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from .db import get_session
-from .models import User, create_user, get_user_dict
+from .models import User, BlacklistedToken, create_user, get_user_dict
 from .security import (
     create_access_token,
     create_refresh_token,
-    is_password_correct
+    is_password_correct,
+    is_token_well_formed,
+    JWT_ALGORITHM,
+    SECRET_KEY
 )
+from .schema import LoginData, LogoutData, RegistrationData
+
 
 router: APIRouter = APIRouter()
-
-
-class RegistrationData(BaseModel):
-    username: str
-    password1: str
-    password2: str
-
-
-class LoginData(BaseModel):
-    username: str
-    password: str
 
 
 @router.put('/register')
@@ -67,6 +60,38 @@ async def login(data: LoginData, session: Session = Depends(get_session)):
         }
     else:
         raise _get_error_details_exception(404, 'wrong_credentials')
+
+
+@router.post('/logout')
+async def logout(data: LogoutData, session: Session = Depends(get_session)):
+    if is_token_well_formed(data.access_token):
+        blacklist_access_token: bool = True
+    else:
+        raise _get_error_details_exception(401, 'invalid_access_token')
+
+    if is_token_well_formed(data.refresh_token):
+        blacklist_refresh_token: bool = True
+    else:
+        raise _get_error_details_exception(401, 'invalid_refresh_token')
+
+    if blacklist_access_token:
+        session.add(BlacklistedToken(token=data.access_token))
+
+    if blacklist_refresh_token:
+        session.add(BlacklistedToken(token=data.refresh_token))
+
+    try:
+        session.commit()
+    except IntegrityError:
+        # All good. We're not adding them to the blacklist since they're
+        # already in it.
+        pass
+
+    return {
+        'data': {
+            'success': True
+        }
+    }
 
 
 def _get_user_tokens(user_data: dict) -> dict:

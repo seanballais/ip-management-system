@@ -6,6 +6,10 @@ import jwt
 from .config import settings
 
 
+SECRET_KEY: str = settings.jwt_token_secret
+JWT_ALGORITHM: str = 'HS256'
+
+
 def hash_password(password: str) -> str:
     pass_bytes: bytes = password.encode('utf-8')
     salt: bytes = bcrypt.gensalt()
@@ -40,6 +44,21 @@ def create_refresh_token(data: dict) -> str:
     return create_jwt_token(data, expires_delta)
 
 
+def is_token_well_formed(token: str) -> bool:
+    # Does not check if the token is still valid, however.
+    try:
+        # Just here to validate a token.
+        jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        # No problem with this one. We won't need to blacklist the access
+        # token then.
+        pass
+    except jwt.InvalidTokenError:
+        return False
+
+    return True
+
+
 # Taken from: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
 def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
     encoded_data = data.copy()
@@ -52,6 +71,6 @@ def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
 
     encoded_jwt = jwt.encode(encoded_data,
                              settings.jwt_token_secret,
-                             algorithm='HS256')
+                             algorithm=JWT_ALGORITHM)
 
     return encoded_jwt

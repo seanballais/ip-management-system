@@ -8,7 +8,7 @@ sys.path.append(str(src_path))
 
 
 from auth import db
-from auth.models import User
+from auth.models import User, BlacklistedToken
 
 
 def main():
