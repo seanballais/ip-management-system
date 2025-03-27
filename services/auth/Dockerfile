@@ -9,6 +9,9 @@ WORKDIR /app
 ARG UID=10001
 RUN adduser --disabled-password --gecos "" --uid "${UID}" app_user
 
+RUN apt update && \
+    apt install -y libpq-dev gcc
+
 # Install dependencies.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

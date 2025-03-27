@@ -18,10 +18,11 @@ target_path_docker = "docker/auth.db.env"
 value = "postgresql" # The value of the environment variable.
 
 [database_host]
-value = "localhost"
+value = "auth-db"
 
 [database_port]
 value = 5433
+docker_var_name = "pgport"
 
 [database_name]
 value = "auth_db"
