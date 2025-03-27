@@ -13,6 +13,11 @@ class User(SQLModel, table=True):
     is_superuser: bool = Field(default=False)
 
 
+class BlacklistedToken(SQLModel, table=True):
+    id: typing.Optional[int] = Field(default=None, primary_key=True)
+    token: str = Field(index=True, unique=True)
+
+
 def create_user(username: str,
                 raw_password: str,
                 is_superuser: bool,
