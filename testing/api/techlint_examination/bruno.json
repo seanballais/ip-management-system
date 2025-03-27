@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "techlint_examination",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
