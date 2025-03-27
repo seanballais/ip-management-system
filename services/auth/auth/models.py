@@ -8,3 +8,7 @@ class User(SQLModel, table=True):
     username: str = Field(index=True)
     password: str
     is_superuser: bool = Field(default=False)
+
+
+def create_user(user: User):
+    pass

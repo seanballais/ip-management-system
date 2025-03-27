@@ -1,5 +1,5 @@
 fastapi[all]
 sqlmodel
 pyjwt
-passlib[bcrypt]
+bcrypt
 psycopg2

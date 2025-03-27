@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+
+from .security import hash_password, verify_password
+
 router: APIRouter = APIRouter()
 
 
@@ -23,6 +26,13 @@ async def register(data: Registration):
                 ]
             }
         )
+
+    hashed_password: str = hash_password(data.password1)
+    is_password_correct: bool = verify_password(data.password1, hashed_password)
+
+    print('Raw Password:', data.password1)
+    print('Hashed Password:', hashed_password)
+    print('Is password correct?', is_password_correct)
 
     return {
         'data': {
