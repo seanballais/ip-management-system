@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 
-from .config import settings
+from .routes import router
 
 app = FastAPI()
 
-
-@app.get('/')
-async def index():
-    print(settings)
-    return { 'Hello': 'World' }
+app.include_router(router)
