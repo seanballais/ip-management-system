@@ -1,10 +1,10 @@
 # Specifies the path where the env file that a service will use will be
 # generated to.
-target_path = "services/auth/env/db.env"
+target_path = "services/auth/env/auth.env"
 
 # Specifies the path where the env file that will be used by Docker will be
 # generated to.
-target_path_docker = "docker/auth.db.env"
+target_path_docker = "docker/auth.env"
 
 # Each TOML table represents an environment variable. The table name
 # will be converted into uppercase in the final env file.
@@ -39,3 +39,13 @@ docker_var_name = "postgres_user"
 [database_password]
 value = "auth_user_12345"
 docker_var_name = "postgres_password"
+
+[jwt_token_secret]
+# Generated with `openssl rand -hex 32`.
+value = "892748d74a477dd1323853564b71e361789ada19b9506745af5f701536640b3f"
+
+[access_token_minutes_ttl]
+value = 15
+
+[refresh_token_minutes_ttl]
+value = 60

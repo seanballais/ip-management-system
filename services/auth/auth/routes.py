@@ -5,6 +5,7 @@ from sqlmodel import Session
 
 from .db import get_session
 from .models import User, create_user
+from .security import create_access_token
 
 
 router: APIRouter = APIRouter()
@@ -44,15 +45,20 @@ async def register(data: Registration, session: Session=Depends(get_session)):
             }
         )
 
+    # Create access and refresh tokens.
+    user_data: dict = {
+        'id': user.id,
+        'username': user.username,
+        'is_superuser': user.is_superuser
+    }
+
+    access_token: str = create_access_token(user_data)
+
     return {
         'data': {
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'is_superuser': user.is_superuser
-            },
+            'user': user_data,
             'authorization': {
-                'access_token': '<access_token>',
+                'access_token': access_token,
                 'refresh_token': '<refresh_token>'
             }
         }

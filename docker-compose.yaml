@@ -6,7 +6,7 @@ services:
     volumes:
       - ./services/auth/:/app
     env_file:
-      - services/auth/env/db.env
+      - services/auth/env/auth.env
     command: fastapi dev auth/main.py --host 0.0.0.0 --port 8081
     ports:
       - "8081:8081"
@@ -22,7 +22,7 @@ services:
     volumes:
       - auth-db-data:/var/lib/postgresql/data
     env_file:
-      - docker/auth.db.env
+      - docker/auth.env
     ports:
       - "5433:5433"
     networks:
