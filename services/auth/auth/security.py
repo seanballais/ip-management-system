@@ -65,10 +65,11 @@ def is_access_token_valid(token: str) -> bool:
     return True
 
 
-# Taken from: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
 def create_jwt_token(data: dict,
                      token_type: str | None = None,
                      expires_delta: timedelta | None = None) -> str:
+    # Taken from:
+    #   https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
     payload: dict = {
         'data': data
     }
