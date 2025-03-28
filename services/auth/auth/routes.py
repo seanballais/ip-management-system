@@ -11,7 +11,7 @@ from sqlmodel import Session, select, or_
 from .db import get_session
 from .models import User, BlacklistedToken, create_user, get_user_dict
 from .schema import (
-    AccessTokenValidationData, LoginData,
+    AccessTokenValidationData, AuditData, LoginData,
     LogoutData, TokenRefreshData, RegistrationData, UsersData
 )
 from .security import is_password_correct
@@ -190,6 +190,14 @@ async def token_refresh(data: TokenRefreshData,
     return {
         'data': tokens
     }
+
+
+@router.get('/audit-log')
+async def audit(items_per_page: Annotated[int, Query()],
+                page_number: Annotated[int, Query()],
+                data: AuditData,
+                session: Session = Depends(get_session)) -> dict:
+    return {}
 
 
 def _get_user_tokens(user_data: dict) -> dict:

@@ -27,3 +27,7 @@ class AccessTokenValidationData(BaseModel):
 
 class TokenRefreshData(BaseModel):
     refresh_token: str
+
+
+class AuditData(BaseModel):
+    access_token: str
