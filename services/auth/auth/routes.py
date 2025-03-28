@@ -22,13 +22,12 @@ from .tokens import (
     InvalidAccessTokenError
 )
 
-
 router: APIRouter = APIRouter()
 
 
 @router.put('/register')
 async def register(data: RegistrationData,
-                   session: Session=Depends(get_session)) -> dict:
+                   session: Session = Depends(get_session)) -> dict:
     if data.password1 != data.password2:
         raise _get_error_details_exception(422, 'mismatched_passwords')
 
@@ -104,6 +103,7 @@ async def logout(data: LogoutData,
         }
     }
 
+
 @router.get('/users')
 async def users(data: UsersData,
                 user_id: Annotated[list[int] | None, Query(alias='id')] = None,
@@ -133,7 +133,15 @@ async def users(data: UsersData,
 
 @router.post('/token/access/validate')
 async def access_token_validate(data: AccessTokenValidationData) -> dict:
-    return {}
+    try:
+        payload: dict = validate_access_token(data.access_token)
+    except InvalidAccessTokenError:
+        raise _get_error_details_exception(401, 'invalid_access_token')
+
+    # A valid token will have a 'data' key in its payload.
+    return {
+        'data': payload['data']
+    }
 
 
 def _get_user_tokens(user_data: dict) -> dict:
@@ -146,7 +154,8 @@ def _get_user_tokens(user_data: dict) -> dict:
     }
 
 
-def _get_error_details_exception(status_code: int, error_code: str) -> HTTPException:
+def _get_error_details_exception(status_code: int,
+                                 error_code: str) -> HTTPException:
     return HTTPException(
         status_code=status_code,
         detail={

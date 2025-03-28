@@ -1,19 +1,13 @@
 meta {
-  name: Auth Users
+  name: Auth Access Token Validation
   type: http
-  seq: 5
+  seq: 6
 }
 
 get {
-  url: http://localhost:8081/users?id=11&id=14&id=12
+  url: http://localhost:8081/token/access/validate
   body: json
   auth: inherit
-}
-
-params:query {
-  id: 11
-  id: 14
-  id: 12
 }
 
 body:json {

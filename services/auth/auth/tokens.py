@@ -55,7 +55,8 @@ def validate_access_token(token: str, session: Session | None = None) -> dict:
     except jwt.InvalidTokenError:
         raise InvalidAccessTokenError()
 
-    if 'token_type' not in payload or payload['token_type'] != 'access_token':
+    if ('token_type' not in payload or 'data' not in payload
+            or payload['token_type'] != 'access_token'):
         raise InvalidAccessTokenError()
 
     # Check if the token is not a blacklisted token.
