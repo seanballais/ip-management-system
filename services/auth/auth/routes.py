@@ -51,8 +51,8 @@ async def register(data: RegistrationData,
 @router.post('/login')
 async def login(data: LoginData,
                 session: Session = Depends(get_session)) -> dict:
-    statement = select(User).where(User.username == data.username)
-    user = session.exec(statement).first()
+    statement: Select = select(User).where(User.username == data.username)
+    user: User = session.exec(statement).first()
 
     if user is None:
         raise _get_error_details_exception(404, 'wrong_credentials')

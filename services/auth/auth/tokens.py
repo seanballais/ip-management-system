@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 
 import jwt
 from sqlalchemy import Select
@@ -8,9 +9,13 @@ from .config import settings
 from .db import get_session
 from .models import BlacklistedToken
 
-
 SECRET_KEY: str = settings.jwt_token_secret
 JWT_ALGORITHM: str = 'HS256'
+
+
+class TokenType(Enum):
+    ACCESS_TOKEN = 'access_token'
+    REFRESH_TOKEN = 'refresh_token'
 
 
 class InvalidAccessTokenError(Exception):
@@ -19,13 +24,13 @@ class InvalidAccessTokenError(Exception):
 
 def create_access_token(data: dict) -> str:
     return _create_auth_jwt_token(data,
-                                  'access_token',
+                                  TokenType.ACCESS_TOKEN,
                                   settings.access_token_minutes_ttl)
 
 
 def create_refresh_token(data: dict) -> str:
     return _create_auth_jwt_token(data,
-                                  'refresh_token',
+                                  TokenType.REFRESH_TOKEN,
                                   settings.refresh_token_minutes_ttl)
 
 
@@ -49,14 +54,15 @@ def validate_access_token(token: str, session: Session | None = None) -> dict:
         session = next(get_session())
 
     try:
-        payload: dict = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        payload: dict = jwt.decode(token, SECRET_KEY,
+                                   algorithms=[JWT_ALGORITHM])
     except jwt.ExpiredSignatureError:
         raise InvalidAccessTokenError()
     except jwt.InvalidTokenError:
         raise InvalidAccessTokenError()
 
     if ('token_type' not in payload or 'data' not in payload
-            or payload['token_type'] != 'access_token'):
+            or payload['token_type'] != TokenType.ACCESS_TOKEN.value):
         raise InvalidAccessTokenError()
 
     # Check if the token is not a blacklisted token.
@@ -72,7 +78,7 @@ def validate_access_token(token: str, session: Session | None = None) -> dict:
 
 
 def create_jwt_token(data: dict,
-                     token_type: str | None = None,
+                     token_type: TokenType | None = None,
                      expires_delta: timedelta | None = None) -> str:
     # Taken from:
     #   https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
@@ -81,7 +87,7 @@ def create_jwt_token(data: dict,
     }
 
     if token_type:
-        payload.update({'token_type': token_type})
+        payload.update({'token_type': token_type.value})
 
     if expires_delta:
         expire: datetime = datetime.now(timezone.utc) + expires_delta
@@ -97,7 +103,7 @@ def create_jwt_token(data: dict,
     return encoded_jwt
 
 
-def _create_auth_jwt_token(data: dict, token_type: str, ttl: int) -> str:
+def _create_auth_jwt_token(data: dict, token_type: TokenType, ttl: int) -> str:
     # TTL is in minutes.
     token_data: dict = data.copy()
     expires_delta: timedelta = timedelta(minutes=ttl)
