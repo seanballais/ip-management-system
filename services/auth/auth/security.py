@@ -66,10 +66,16 @@ def is_access_token_valid(token: str) -> bool:
 
 
 # Taken from: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
-def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_jwt_token(data: dict,
+                     token_type: str | None = None,
+                     expires_delta: timedelta | None = None) -> str:
     payload: dict = {
         'data': data
     }
+
+    if token_type:
+        payload.update({'token_type': token_type})
+
     if expires_delta:
         expire: datetime = datetime.now(timezone.utc) + expires_delta
     else:
@@ -85,8 +91,8 @@ def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
 
 
 def _create_auth_jwt_token(data: dict, token_type: str, ttl: int) -> str:
+    # TTL is in minutes.
     token_data: dict = data.copy()
-    token_data.update({'token_type': token_type})
     expires_delta: timedelta = timedelta(minutes=ttl)
 
-    return create_jwt_token(token_data, expires_delta)
+    return create_jwt_token(token_data, token_type, expires_delta)
