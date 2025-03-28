@@ -18,9 +18,11 @@ from .security import is_password_correct
 from .tokens import (
     create_access_token,
     create_refresh_token,
-    validate_access_token,
     is_token_well_formed,
-    InvalidAccessTokenError
+    validate_access_token,
+    validate_refresh_token,
+    InvalidAccessTokenError,
+    InvalidRefreshTokenError
 )
 
 
@@ -125,7 +127,7 @@ async def users(data: UsersData,
                 user_id: Annotated[list[int] | None, Query(alias='id')] = None,
                 session: Session = Depends(get_session)) -> dict:
     try:
-        validate_access_token(data.access_token)
+        validate_access_token(data.access_token, session)
     except InvalidAccessTokenError:
         raise _get_error_details_exception(401,
                                            RouteErrorCode.INVALID_ACCESS_TOKEN)
@@ -149,9 +151,11 @@ async def users(data: UsersData,
 
 
 @router.post('/token/access/validate')
-async def access_token_validate(data: AccessTokenValidationData) -> dict:
+async def access_token_validate(data: AccessTokenValidationData,
+                                session: Session = Depends(
+                                    get_session)) -> dict:
     try:
-        payload: dict = validate_access_token(data.access_token)
+        payload: dict = validate_access_token(data.access_token, session)
     except InvalidAccessTokenError:
         raise _get_error_details_exception(401,
                                            RouteErrorCode.INVALID_ACCESS_TOKEN)
@@ -163,9 +167,29 @@ async def access_token_validate(data: AccessTokenValidationData) -> dict:
 
 
 @router.get('/token/refresh')
-async def token_refresh(data: TokenRefreshData) -> dict:
+async def token_refresh(data: TokenRefreshData,
+                        session: Session = Depends(get_session)) -> dict:
     try:
-        payload: dict =
+        payload: dict = validate_refresh_token(data.refresh_token, session)
+    except InvalidRefreshTokenError:
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_REFRESH_TOKEN)
+
+    tokens: dict = _get_user_tokens(payload['data'])
+
+    # Let's blacklist the refresh token first.
+    session.add(BlacklistedToken(token=data.refresh_token))
+
+    try:
+        session.commit()
+    except IntegrityError:
+        # All good. We're not adding the refresh token to the blacklist since
+        # it's already blacklisted.
+        pass
+
+    return {
+        'data': tokens
+    }
 
 
 def _get_user_tokens(user_data: dict) -> dict:
