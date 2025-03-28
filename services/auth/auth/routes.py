@@ -9,13 +9,17 @@ from sqlmodel import Session, select, or_
 
 from .db import get_session
 from .models import User, BlacklistedToken, create_user, get_user_dict
-from .schema import LoginData, LogoutData, RegistrationData, UsersData
+from .schema import (
+    AccessTokenValidationData, LoginData,
+    LogoutData, RegistrationData, UsersData
+)
 from .security import is_password_correct
 from .tokens import (
     create_access_token,
     create_refresh_token,
-    is_access_token_valid,
-    is_token_well_formed
+    validate_access_token,
+    is_token_well_formed,
+    InvalidAccessTokenError
 )
 
 
@@ -104,7 +108,9 @@ async def logout(data: LogoutData,
 async def users(data: UsersData,
                 user_id: Annotated[list[int] | None, Query(alias='id')] = None,
                 session: Session = Depends(get_session)) -> dict:
-    if not is_access_token_valid(data.access_token):
+    try:
+        validate_access_token(data.access_token)
+    except InvalidAccessTokenError:
         raise _get_error_details_exception(401, 'invalid_access_token')
 
     or_expressions: list[BinaryExpression] = list(
@@ -123,6 +129,11 @@ async def users(data: UsersData,
             'users': user_dicts
         }
     }
+
+
+@router.post('/token/access/validate')
+async def access_token_validate(data: AccessTokenValidationData) -> dict:
+    return {}
 
 
 def _get_user_tokens(user_data: dict) -> dict:

@@ -5,19 +5,19 @@ meta {
 }
 
 get {
-  url: http://localhost:8081/users?id=11&id=12&id=14
+  url: http://localhost:8081/users?id=11&id=14&id=12
   body: json
   auth: inherit
 }
 
 params:query {
   id: 11
-  id: 12
   id: 14
+  id: 12
 }
 
 body:json {
   {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxMSwidXNlcm5hbWUiOiJ0ZXN0X3VzZXIiLCJpc19zdXBlcnVzZXIiOmZhbHNlfSwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsImV4cCI6MTc0MzEzNTUxNH0.z6p8dEv7Dm15mX4qufgPGv6g8vvp6YaQbr6dPJYGG_k"
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxMSwidXNlcm5hbWUiOiJ0ZXN0X3VzZXIiLCJpc19zdXBlcnVzZXIiOmZhbHNlfSwidG9rZW5fdHlwZSI6ImFjY2Vzc190b2tlbiIsImV4cCI6MTc0MzEzNjQ2Mn0.EQAhFX7lmZWqCJYlF-3YapogAH004X3OlSS7QVRTYNM"
   }
 }

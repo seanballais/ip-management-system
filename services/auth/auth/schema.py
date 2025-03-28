@@ -19,3 +19,7 @@ class LogoutData(BaseModel):
 
 class UsersData(BaseModel):
     access_token: str
+
+
+class AccessTokenValidationData(BaseModel):
+    access_token: str

@@ -13,6 +13,10 @@ SECRET_KEY: str = settings.jwt_token_secret
 JWT_ALGORITHM: str = 'HS256'
 
 
+class InvalidAccessTokenError(Exception):
+    pass
+
+
 def create_access_token(data: dict) -> str:
     return _create_auth_jwt_token(data,
                                   'access_token',
@@ -40,19 +44,19 @@ def is_token_well_formed(token: str) -> bool:
     return True
 
 
-def is_access_token_valid(token: str, session: Session | None = None):
+def validate_access_token(token: str, session: Session | None = None) -> dict:
     if session is None:
         session = next(get_session())
 
     try:
         payload: dict = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
     except jwt.ExpiredSignatureError:
-        return False
+        raise InvalidAccessTokenError()
     except jwt.InvalidTokenError:
-        return False
+        raise InvalidAccessTokenError()
 
     if 'token_type' not in payload or payload['token_type'] != 'access_token':
-        return False
+        raise InvalidAccessTokenError()
 
     # Check if the token is not a blacklisted token.
     statement: Select = (
@@ -61,9 +65,9 @@ def is_access_token_valid(token: str, session: Session | None = None):
     token_is_blacklisted: bool = bool(session.exec(statement).first())
 
     if token_is_blacklisted:
-        return False
+        raise InvalidAccessTokenError()
 
-    return True
+    return payload
 
 
 def create_jwt_token(data: dict,
