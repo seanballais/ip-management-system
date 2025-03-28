@@ -8,8 +8,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.elements import BinaryExpression
 from sqlmodel import Session, select, or_
 
+from . import models
 from .db import get_session
-from .models import User, BlacklistedToken, create_user, get_user_dict
+from .models import create_user, get_user_dict
 from .schema import (
     AccessTokenValidationData, AuditData, LoginData,
     LogoutData, TokenRefreshData, RegistrationData, UsersData
@@ -34,6 +35,11 @@ class RouteErrorCode(Enum):
     INVALID_REFRESH_TOKEN = 'invalid_refresh_token'
 
 
+class UserEventType(Enum):
+    LOGIN = 'login'
+    LOGOUT = 'logout'
+
+
 router: APIRouter = APIRouter()
 
 
@@ -45,7 +51,8 @@ async def register(data: RegistrationData,
                                            RouteErrorCode.MISMATCHED_PASSWORDS)
 
     try:
-        user: User = create_user(data.username, data.password1, False, session)
+        user: models.User = create_user(data.username, data.password1, False,
+                                        session)
     except IntegrityError:
         raise _get_error_details_exception(409,
                                            RouteErrorCode.UNAVAILABLE_USERNAME)
@@ -65,8 +72,9 @@ async def register(data: RegistrationData,
 @router.post('/login')
 async def login(data: LoginData,
                 session: Session = Depends(get_session)) -> dict:
-    statement: Select = select(User).where(User.username == data.username)
-    user: User = session.exec(statement).first()
+    statement: Select = select(models.User).where(
+        models.User.username == data.username)
+    user: models.User = session.exec(statement).first()
 
     if user is None:
         raise _get_error_details_exception(404,
@@ -103,10 +111,10 @@ async def logout(data: LogoutData,
                                            RouteErrorCode.INVALID_REFRESH_TOKEN)
 
     if blacklist_access_token:
-        session.add(BlacklistedToken(token=data.access_token))
+        session.add(models.BlacklistedToken(token=data.access_token))
 
     if blacklist_refresh_token:
-        session.add(BlacklistedToken(token=data.refresh_token))
+        session.add(models.BlacklistedToken(token=data.refresh_token))
 
     try:
         session.commit()
@@ -133,12 +141,13 @@ async def users(data: UsersData,
                                            RouteErrorCode.INVALID_ACCESS_TOKEN)
 
     or_expressions: list[BinaryExpression] = list(
-        map(lambda id_: User.id == id_, user_id)
+        map(lambda id_: models.User.id == id_, user_id)
     )
     statement: Select = (
-        select(User).where(or_(*or_expressions)).order_by(User.id)
+        select(models.User).where(or_(*or_expressions)).order_by(
+            models.User.id)
     )
-    results: TupleResult[User] = session.exec(statement)
+    results: TupleResult[models.User] = session.exec(statement)
     user_dicts: list[dict] = []
     for user in results:
         user_dicts.append(get_user_dict(user))
@@ -178,7 +187,7 @@ async def token_refresh(data: TokenRefreshData,
     tokens: dict = _get_user_tokens(payload['data'])
 
     # Let's blacklist the refresh token first.
-    session.add(BlacklistedToken(token=data.refresh_token))
+    session.add(models.BlacklistedToken(token=data.refresh_token))
 
     try:
         session.commit()
