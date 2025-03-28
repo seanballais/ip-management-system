@@ -23,3 +23,7 @@ class UsersData(BaseModel):
 
 class AccessTokenValidationData(BaseModel):
     access_token: str
+
+
+class TokenRefreshData(BaseModel):
+    refresh_token: str

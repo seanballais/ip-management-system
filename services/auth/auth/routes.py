@@ -12,7 +12,7 @@ from .db import get_session
 from .models import User, BlacklistedToken, create_user, get_user_dict
 from .schema import (
     AccessTokenValidationData, LoginData,
-    LogoutData, RegistrationData, UsersData
+    LogoutData, TokenRefreshData, RegistrationData, UsersData
 )
 from .security import is_password_correct
 from .tokens import (
@@ -160,6 +160,12 @@ async def access_token_validate(data: AccessTokenValidationData) -> dict:
     return {
         'data': payload['data']
     }
+
+
+@router.get('/token/refresh')
+async def token_refresh(data: TokenRefreshData) -> dict:
+    try:
+        payload: dict =
 
 
 def _get_user_tokens(user_data: dict) -> dict:

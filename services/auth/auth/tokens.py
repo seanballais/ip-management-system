@@ -22,6 +22,14 @@ class InvalidAccessTokenError(Exception):
     pass
 
 
+class InvalidRefreshTokenError(Exception):
+    pass
+
+
+class InvalidTokenError(Exception):
+    pass
+
+
 def create_access_token(data: dict) -> str:
     return _create_auth_jwt_token(data,
                                   TokenType.ACCESS_TOKEN,
@@ -54,16 +62,41 @@ def validate_access_token(token: str, session: Session | None = None) -> dict:
         session = next(get_session())
 
     try:
+        payload: dict = validate_token(token, TokenType.ACCESS_TOKEN, session)
+    except InvalidTokenError:
+        raise InvalidAccessTokenError()
+
+    return payload
+
+
+def validate_refresh_token(token: str, session: Session | None = None) -> dict:
+    if session is None:
+        session = next(get_session())
+
+    try:
+        payload: dict = validate_token(token, TokenType.REFRESH_TOKEN, session)
+    except InvalidTokenError:
+        raise InvalidRefreshTokenError()
+
+    return payload
+
+
+def validate_token(token: str, token_type: TokenType,
+                   session: Session | None = None) -> dict:
+    if session is None:
+        session = next(get_session())
+
+    try:
         payload: dict = jwt.decode(token, SECRET_KEY,
                                    algorithms=[JWT_ALGORITHM])
     except jwt.ExpiredSignatureError:
-        raise InvalidAccessTokenError()
+        raise InvalidTokenError()
     except jwt.InvalidTokenError:
-        raise InvalidAccessTokenError()
+        raise InvalidTokenError()
 
     if ('token_type' not in payload or 'data' not in payload
-            or payload['token_type'] != TokenType.ACCESS_TOKEN.value):
-        raise InvalidAccessTokenError()
+            or payload['token_type'] != token_type.value):
+        raise InvalidTokenError()
 
     # Check if the token is not a blacklisted token.
     statement: Select = (
@@ -72,7 +105,7 @@ def validate_access_token(token: str, session: Session | None = None) -> dict:
     token_is_blacklisted: bool = bool(session.exec(statement).first())
 
     if token_is_blacklisted:
-        raise InvalidAccessTokenError()
+        raise InvalidTokenError()
 
     return payload
 
