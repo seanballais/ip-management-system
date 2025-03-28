@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,6 +23,15 @@ from .tokens import (
     InvalidAccessTokenError
 )
 
+
+class RouteErrorCode(Enum):
+    MISMATCHED_PASSWORDS = 'mismatched_passwords'
+    UNAVAILABLE_USERNAME = 'unavailable_username'
+    WRONG_CREDENTIALS = 'wrong_credentials'
+    INVALID_ACCESS_TOKEN = 'invalid_access_token'
+    INVALID_REFRESH_TOKEN = 'invalid_refresh_token'
+
+
 router: APIRouter = APIRouter()
 
 
@@ -29,12 +39,14 @@ router: APIRouter = APIRouter()
 async def register(data: RegistrationData,
                    session: Session = Depends(get_session)) -> dict:
     if data.password1 != data.password2:
-        raise _get_error_details_exception(422, 'mismatched_passwords')
+        raise _get_error_details_exception(422,
+                                           RouteErrorCode.MISMATCHED_PASSWORDS)
 
     try:
         user: User = create_user(data.username, data.password1, False, session)
     except IntegrityError:
-        raise _get_error_details_exception(409, 'unavailable_username')
+        raise _get_error_details_exception(409,
+                                           RouteErrorCode.UNAVAILABLE_USERNAME)
 
     # Create access and refresh tokens.
     user_data: dict = get_user_dict(user)
@@ -55,7 +67,8 @@ async def login(data: LoginData,
     user: User = session.exec(statement).first()
 
     if user is None:
-        raise _get_error_details_exception(404, 'wrong_credentials')
+        raise _get_error_details_exception(404,
+                                           RouteErrorCode.WRONG_CREDENTIALS)
 
     if is_password_correct(data.password, user.password):
         user_data: dict = get_user_dict(user)
@@ -68,7 +81,8 @@ async def login(data: LoginData,
             }
         }
     else:
-        raise _get_error_details_exception(404, 'wrong_credentials')
+        raise _get_error_details_exception(404,
+                                           RouteErrorCode.WRONG_CREDENTIALS)
 
 
 @router.post('/logout')
@@ -77,12 +91,14 @@ async def logout(data: LogoutData,
     if is_token_well_formed(data.access_token):
         blacklist_access_token: bool = True
     else:
-        raise _get_error_details_exception(401, 'invalid_access_token')
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_ACCESS_TOKEN)
 
     if is_token_well_formed(data.refresh_token):
         blacklist_refresh_token: bool = True
     else:
-        raise _get_error_details_exception(401, 'invalid_refresh_token')
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_REFRESH_TOKEN)
 
     if blacklist_access_token:
         session.add(BlacklistedToken(token=data.access_token))
@@ -111,7 +127,8 @@ async def users(data: UsersData,
     try:
         validate_access_token(data.access_token)
     except InvalidAccessTokenError:
-        raise _get_error_details_exception(401, 'invalid_access_token')
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_ACCESS_TOKEN)
 
     or_expressions: list[BinaryExpression] = list(
         map(lambda id_: User.id == id_, user_id)
@@ -136,7 +153,8 @@ async def access_token_validate(data: AccessTokenValidationData) -> dict:
     try:
         payload: dict = validate_access_token(data.access_token)
     except InvalidAccessTokenError:
-        raise _get_error_details_exception(401, 'invalid_access_token')
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_ACCESS_TOKEN)
 
     # A valid token will have a 'data' key in its payload.
     return {
@@ -155,13 +173,13 @@ def _get_user_tokens(user_data: dict) -> dict:
 
 
 def _get_error_details_exception(status_code: int,
-                                 error_code: str) -> HTTPException:
+                                 error_code: RouteErrorCode) -> HTTPException:
     return HTTPException(
         status_code=status_code,
         detail={
             'errors': [
                 {
-                    'code': error_code
+                    'code': error_code.value
                 }
             ]
         }
