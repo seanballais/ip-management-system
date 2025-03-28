@@ -59,17 +59,32 @@ def is_token_well_formed(token: str) -> bool:
     return True
 
 
+def is_access_token_valid(token: str) -> bool:
+    try:
+        payload: dict = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidTokenError:
+        return False
+
+    print(payload)
+
+    return True
+
+
 # Taken from: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
 def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    encoded_data = data.copy()
+    payload: dict = {
+        'data': data
+    }
     if expires_delta:
         expire: datetime = datetime.now(timezone.utc) + expires_delta
     else:
         expire: datetime = datetime.now(timezone.utc) + timedelta(minutes=15)
 
-    encoded_data.update({'exp': expire})
+    payload.update({'exp': expire})
 
-    encoded_jwt = jwt.encode(encoded_data,
+    encoded_jwt = jwt.encode(payload,
                              settings.jwt_token_secret,
                              algorithm=JWT_ALGORITHM)
 

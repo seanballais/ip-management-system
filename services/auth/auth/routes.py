@@ -9,6 +9,7 @@ from .models import User, BlacklistedToken, create_user, get_user_dict
 from .security import (
     create_access_token,
     create_refresh_token,
+    is_access_token_valid,
     is_password_correct,
     is_token_well_formed
 )
@@ -96,8 +97,7 @@ async def logout(data: LogoutData, session: Session = Depends(get_session)):
 @router.get('/users')
 async def users(data: UsersData,
                 user_id: Annotated[list[int] | None, Query(alias='id')] = None):
-    print(data)
-    print(user_id)
+    print(is_access_token_valid(data.access_token))
 
     return {}
 

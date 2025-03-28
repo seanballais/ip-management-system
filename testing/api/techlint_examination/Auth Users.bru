@@ -1,0 +1,23 @@
+meta {
+  name: Auth Users
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8081/users?id=11&id=12&id=14
+  body: json
+  auth: inherit
+}
+
+params:query {
+  id: 11
+  id: 12
+  id: 14
+}
+
+body:json {
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxMSwidXNlcm5hbWUiOiJ0ZXN0X3VzZXIiLCJpc19zdXBlcnVzZXIiOmZhbHNlfSwiZXhwIjoxNzQzMTI3NjM2fQ.gfr7G5w7AH3dSD7HPa_c4th4aW69q4SM_eKNpLa2cyk"
+  }
+}
