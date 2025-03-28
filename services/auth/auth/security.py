@@ -26,22 +26,15 @@ def is_password_correct(raw_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict) -> str:
-    token_data: dict = data.copy()
-    token_data.update({'token_type': 'access_token'})
-
-    ttl: int = settings.access_token_minutes_ttl
-    expires_delta: timedelta = timedelta(minutes=ttl)
-
-    return create_jwt_token(data, expires_delta)
+    return _create_auth_jwt_token(data,
+                                  'access_token',
+                                  settings.access_token_minutes_ttl)
 
 
 def create_refresh_token(data: dict) -> str:
-    token_data: dict = data.copy()
-    token_data.update({'token_type': 'refresh_token'})
-
-    ttl: int = settings.refresh_token_minutes_ttl
-    expires_delta: timedelta = timedelta(minutes=ttl)
-    return create_jwt_token(data, expires_delta)
+    return _create_auth_jwt_token(data,
+                                  'refresh_token',
+                                  settings.refresh_token_minutes_ttl)
 
 
 def is_token_well_formed(token: str) -> bool:
@@ -89,3 +82,11 @@ def create_jwt_token(data: dict, expires_delta: timedelta | None = None) -> str:
                              algorithm=JWT_ALGORITHM)
 
     return encoded_jwt
+
+
+def _create_auth_jwt_token(data: dict, token_type: str, ttl: int) -> str:
+    token_data: dict = data.copy()
+    token_data.update({'token_type': token_type})
+    expires_delta: timedelta = timedelta(minutes=ttl)
+
+    return create_jwt_token(token_data, expires_delta)
