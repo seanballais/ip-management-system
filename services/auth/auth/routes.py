@@ -1,8 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import Select
+from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session, select
+from sqlalchemy.sql.elements import BinaryExpression
+from sqlmodel import Session, select, or_
 
 from .db import get_session
 from .models import User, BlacklistedToken, create_user, get_user_dict
@@ -20,7 +23,8 @@ router: APIRouter = APIRouter()
 
 
 @router.put('/register')
-async def register(data: RegistrationData, session: Session=Depends(get_session)):
+async def register(data: RegistrationData,
+                   session: Session=Depends(get_session)) -> dict:
     if data.password1 != data.password2:
         raise _get_error_details_exception(422, 'mismatched_passwords')
 
@@ -42,7 +46,8 @@ async def register(data: RegistrationData, session: Session=Depends(get_session)
 
 
 @router.post('/login')
-async def login(data: LoginData, session: Session = Depends(get_session)):
+async def login(data: LoginData,
+                session: Session = Depends(get_session)) -> dict:
     statement = select(User).where(User.username == data.username)
     user = session.exec(statement).first()
 
@@ -64,7 +69,8 @@ async def login(data: LoginData, session: Session = Depends(get_session)):
 
 
 @router.post('/logout')
-async def logout(data: LogoutData, session: Session = Depends(get_session)):
+async def logout(data: LogoutData,
+                 session: Session = Depends(get_session)) -> dict:
     if is_token_well_formed(data.access_token):
         blacklist_access_token: bool = True
     else:
@@ -96,10 +102,27 @@ async def logout(data: LogoutData, session: Session = Depends(get_session)):
 
 @router.get('/users')
 async def users(data: UsersData,
-                user_id: Annotated[list[int] | None, Query(alias='id')] = None):
-    print('Oi:', is_access_token_valid(data.access_token))
+                user_id: Annotated[list[int] | None, Query(alias='id')] = None,
+                session: Session = Depends(get_session)) -> dict:
+    if not is_access_token_valid(data.access_token):
+        raise _get_error_details_exception(401, 'invalid_access_token')
 
-    return {}
+    or_expressions: list[BinaryExpression] = list(
+        map(lambda id_: User.id == id_, user_id)
+    )
+    statement: Select = (
+        select(User).where(or_(*or_expressions)).order_by(User.id)
+    )
+    results: TupleResult[User] = session.exec(statement)
+    user_dicts: list[dict] = []
+    for user in results:
+        user_dicts.append(get_user_dict(user))
+
+    return {
+        'data': {
+            'users': user_dicts
+        }
+    }
 
 
 def _get_user_tokens(user_data: dict) -> dict:

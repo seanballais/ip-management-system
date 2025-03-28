@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from sqlalchemy import Select
 from sqlmodel import select, Session
 
 from .config import settings
@@ -54,8 +55,9 @@ def is_access_token_valid(token: str, session: Session | None = None):
         return False
 
     # Check if the token is not a blacklisted token.
-    statement = (select(BlacklistedToken)
-                 .where(BlacklistedToken.token == token))
+    statement: Select = (
+        select(BlacklistedToken).where(BlacklistedToken.token == token)
+    )
     token_is_blacklisted: bool = bool(session.exec(statement).first())
 
     if token_is_blacklisted:
