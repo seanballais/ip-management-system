@@ -26,8 +26,8 @@ class UserEventType(SQLModel, table=True):
 
 class UserEvent(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
-    created_on: datetime = Field(default=datetime.now(timezone.utc),
-                                 nullable=False)
+    recorded_on: datetime = Field(default=datetime.now(timezone.utc),
+                                  nullable=False)
 
     user_id: int | None = Field(default=None, foreign_key='user.id')
     user_event_type_id: int | None = Field(default=None,

@@ -236,7 +236,7 @@ async def audit(data: AuditData,
         raise _get_error_details_exception(403, RouteErrorCode.ACCESS_DENIED)
 
     statement: Select = (select(models.UserEvent)
-                         .order_by(models.UserEvent.created_on)
+                         .order_by(models.UserEvent.recorded_on)
                          .offset(page_number * items_per_page)
                          .limit(items_per_page))
     # This line below is taken from the fastapi-pagination project:
@@ -257,6 +257,7 @@ async def audit(data: AuditData,
     for event in events:
         data['events'].append({
             'id': event.id,
+            'recorded_on': event.recorded_on,
             'type': event.user_event_type.name,
             'user': get_user_dict(event.user)
         })
