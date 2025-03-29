@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+import jwt
 from sqlalchemy import Select
 from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
@@ -84,6 +85,9 @@ async def login(data: LoginData,
         user_data: dict = get_user_dict(user)
         user_tokens: dict = _get_user_tokens(user_data)
 
+        # Log it!
+        _log_user_event(user, UserEventType.LOGIN, session)
+
         return {
             'data': {
                 'user': user_data,
@@ -121,7 +125,18 @@ async def logout(data: LogoutData,
     except IntegrityError:
         # All good. We're not adding them to the blacklist since they're
         # already in it.
-        pass
+        session.rollback()
+
+    # Log this!
+    token_payload: dict = jwt.decode(data.access_token,
+                                     options={'verify_signature': False})
+    payload_data: dict = token_payload['data']
+    user_id: int = payload_data['id']
+
+    statement: Select = select(models.User).where(models.User.id == user_id)
+    user: models.User = session.exec(statement).first()
+    if user:
+        _log_user_event(user, UserEventType.LOGOUT, session)
 
     return {
         'data': {
@@ -194,7 +209,7 @@ async def token_refresh(data: TokenRefreshData,
     except IntegrityError:
         # All good. We're not adding the refresh token to the blacklist since
         # it's already blacklisted.
-        pass
+        session.rollback()
 
     return {
         'data': tokens
@@ -207,6 +222,27 @@ async def audit(items_per_page: Annotated[int, Query()],
                 data: AuditData,
                 session: Session = Depends(get_session)) -> dict:
     return {}
+
+
+def _log_user_event(user: models.User, event_type: UserEventType,
+                    session: Session = None):
+    if session is None:
+        session = next(get_session())
+
+    statement: Select = select(models.UserEventType).where(
+        models.UserEventType.name == event_type.value
+    )
+    user_event_type: models.UserEventType = session.exec(statement).first()
+    if user_event_type:
+        # We can do audit logging!
+        user_event: models.UserEvent = models.UserEvent(user_id=user.id,
+                                                        user_event_type_id=user_event_type.id)
+        session.add(user_event)
+        session.commit()
+    else:
+        # TODO: Update this to using a logging package.
+        print('User event types are missing in the database. '
+              'Please run the create-db.py to generate them.')
 
 
 def _get_user_tokens(user_data: dict) -> dict:

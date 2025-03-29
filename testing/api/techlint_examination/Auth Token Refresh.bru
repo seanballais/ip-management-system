@@ -6,6 +6,12 @@ meta {
 
 get {
   url: http://localhost:8081/token/refresh
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxMSwidXNlcm5hbWUiOiJ0ZXN0X3VzZXIiLCJpc19zdXBlcnVzZXIiOmZhbHNlfSwidG9rZW5fdHlwZSI6InJlZnJlc2hfdG9rZW4iLCJleHAiOjE3NDMxODk3MzN9.Cf1YAA7NjvvUS2OnYGuojW1VuenQrmzfz6baaLpROv0"
+  }
 }
