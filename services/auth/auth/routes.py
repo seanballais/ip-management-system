@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 import jwt
-from sqlalchemy import Select
+from sqlalchemy import Select, func
 from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.elements import BinaryExpression
@@ -11,7 +11,8 @@ from sqlmodel import Session, select, or_
 
 from . import models
 from .db import get_session
-from .models import create_user, get_user_dict
+from .encode import get_user_dict
+from .models import create_user
 from .schema import (
     AccessTokenValidationData, AuditData, LoginData,
     LogoutData, TokenRefreshData, RegistrationData, UsersData
@@ -34,6 +35,7 @@ class RouteErrorCode(Enum):
     WRONG_CREDENTIALS = 'wrong_credentials'
     INVALID_ACCESS_TOKEN = 'invalid_access_token'
     INVALID_REFRESH_TOKEN = 'invalid_refresh_token'
+    ACCESS_DENIED = 'access_denied'
 
 
 class UserEventType(Enum):
@@ -217,11 +219,51 @@ async def token_refresh(data: TokenRefreshData,
 
 
 @router.get('/audit-log')
-async def audit(items_per_page: Annotated[int, Query()],
-                page_number: Annotated[int, Query()],
-                data: AuditData,
+async def audit(data: AuditData,
+                items_per_page: Annotated[int, Query(le=50)] = 10,
+                page_number: Annotated[int, Query()] = 0,
                 session: Session = Depends(get_session)) -> dict:
-    return {}
+    try:
+        payload: dict = validate_access_token(data.access_token, session)
+    except InvalidAccessTokenError:
+        raise _get_error_details_exception(401,
+                                           RouteErrorCode.INVALID_ACCESS_TOKEN)
+
+    user_data: dict = payload['data']
+    is_user_superuser: bool = user_data['is_superuser']
+
+    if not is_user_superuser:
+        raise _get_error_details_exception(403, RouteErrorCode.ACCESS_DENIED)
+
+    statement: Select = (select(models.UserEvent)
+                         .order_by(models.UserEvent.created_on)
+                         .offset(page_number * items_per_page)
+                         .limit(items_per_page))
+    # This line below is taken from the fastapi-pagination project:
+    # - https://github.com/uriyyo/fastapi-pagination/blob/1b718ff7b0c9087f684c38386f0e54ef5a3eec29/fastapi_pagination/ext/sqlmodel.py
+    num_items: int = session.scalar(
+        select(func.count('*')).select_from(statement.subquery()))
+
+    total_num_items: int = session.scalar(
+        select(func.count(models.UserEvent.id)))
+
+    events: TupleResult[models.UserEvent] = session.exec(statement)
+    data: dict = {
+        'count': num_items,
+        'num_total_items': total_num_items,
+        'page_number': page_number,
+        'events': []
+    }
+    for event in events:
+        data['events'].append({
+            'id': event.id,
+            'type': event.user_event_type.name,
+            'user': get_user_dict(event.user)
+        })
+
+    return {
+        'data': data
+    }
 
 
 def _log_user_event(user: models.User, event_type: UserEventType,

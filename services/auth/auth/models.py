@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import typing
 
-from sqlmodel import Field, SQLModel, Session
+from sqlmodel import Field, SQLModel, Session, Relationship
 
 from .db import get_session
 from .security import hash_password
@@ -13,20 +13,29 @@ class User(SQLModel, table=True):
     password: str
     is_superuser: bool = Field(default=False)
 
+    user_events: list['UserEvent'] = Relationship(back_populates='user')
+
 
 class UserEventType(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True)
 
+    user_events: list['UserEvent'] = Relationship(
+        back_populates='user_event_type')
+
 
 class UserEvent(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default=datetime.now(timezone.utc),
+    created_on: datetime = Field(default=datetime.now(timezone.utc),
                                  nullable=False)
 
     user_id: int | None = Field(default=None, foreign_key='user.id')
     user_event_type_id: int | None = Field(default=None,
                                            foreign_key='usereventtype.id')
+
+    user: User | None = Relationship(back_populates='user_events')
+    user_event_type: UserEventType | None = Relationship(
+        back_populates='user_events')
 
 
 class BlacklistedToken(SQLModel, table=True):
@@ -49,11 +58,3 @@ def create_user(username: str,
     session.commit()
 
     return user
-
-
-def get_user_dict(user: User) -> dict:
-    return {
-        'id': user.id,
-        'username': user.username,
-        'is_superuser': user.is_superuser
-    }

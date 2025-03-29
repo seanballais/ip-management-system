@@ -1,0 +1,22 @@
+meta {
+  name: Auth Audit Log
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:8081/audit-log?items_per_page=9&page_number=0
+  body: json
+  auth: inherit
+}
+
+params:query {
+  items_per_page: 9
+  page_number: 0
+}
+
+body:json {
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxMSwidXNlcm5hbWUiOiJ0ZXN0X3VzZXIiLCJpc19zdXBlcnVzZXIiOnRydWV9LCJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzQzMjQxMTY1fQ.LJOybIqYRqFxE7BQyD3lqyWQyrzhxJ4KY-LEoLw1zZU"
+  }
+}
