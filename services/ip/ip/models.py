@@ -33,6 +33,7 @@ class IPAddressEvent(SQLModel, table=True):
     event_type_id: typing.Optional[int] = Field(default=None,
                                                 foreign_key='ipaddresseventtype.id')
     old_data: typing.Optional[str] = Field(default=None, sa_type=JSON)
+    new_data: typing.Optional[str] = Field(default=None, sa_type=JSON)
 
     ip_address: typing.Optional[IPAddress] = Relationship(
         back_populates='events')
