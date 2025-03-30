@@ -68,8 +68,8 @@ router: APIRouter = APIRouter()
 
 
 @router.post('/ips')
-async def index(data: AddNewIPAddressData,
-                session: Session = Depends(get_session)):
+async def new_ip_address(data: AddNewIPAddressData,
+                         session: Session = Depends(get_session)):
     if not _is_ip_address_valid(data.ip_address):
         raise _get_error_details_exception(422,
                                            RouteErrorCode.INVALID_IP_ADDRESS)
@@ -83,8 +83,6 @@ async def index(data: AddNewIPAddressData,
     try:
         session.commit()
     except IntegrityError:
-        session.rollback()
-
         raise _get_error_details_exception(404,
                                            RouteErrorCode.UNAVAILABLE_LABEL)
 
