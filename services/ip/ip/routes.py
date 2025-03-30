@@ -11,12 +11,13 @@ from sqlmodel import Session, select
 from . import models
 from .encode import get_ip_address_dict
 from .db import get_session
-from .schema import AddNewIPAddressData
+from .schema import AddNewIPAddressData, UpdateNewIPAddressData
 
 
 class RouteErrorCode(Enum):
     INVALID_IP_ADDRESS: str = 'invalid_ip_address'
     UNAVAILABLE_LABEL: str = 'unavailable_label'
+    NONEXISTENT_IP_ADDRESS: str = 'nonexistent_ip_address'
 
 
 class IPAddressEventType(Enum):
@@ -83,7 +84,7 @@ async def new_ip_address(data: AddNewIPAddressData,
     try:
         session.commit()
     except IntegrityError:
-        raise _get_error_details_exception(404,
+        raise _get_error_details_exception(409,
                                            RouteErrorCode.UNAVAILABLE_LABEL)
 
     session.refresh(ip_address)
@@ -100,7 +101,29 @@ async def new_ip_address(data: AddNewIPAddressData,
     }
 
 
-def _is_ip_address_valid(ip_address):
+@router.patch('/ips/{ip_address_id}')
+async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
+                            session: Session = Depends(get_session)) -> dict:
+    statement: Select = select(models.IPAddress).where(
+        models.IPAddress.id == ip_address_id)
+    print(type(data.ip_address))
+    ip_address: models.IPAddress = session.exec(statement).first()
+    if ip_address is None:
+        raise _get_error_details_exception(404,
+                                           RouteErrorCode.NONEXISTENT_IP_ADDRESS)
+
+    # Validate inputs first.
+    if data.ip_address:
+        if _is_ip_address_valid(data.ip_address):
+            ip_address.ip_address = data.ip_address
+        else:
+            raise _get_error_details_exception(422,
+                                               RouteErrorCode.INVALID_IP_ADDRESS)
+
+    return {}
+
+
+def _is_ip_address_valid(ip_address: str) -> bool:
     try:
         ipaddress.ip_address(ip_address)
     except ValueError:
