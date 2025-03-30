@@ -4,8 +4,16 @@ meta {
   seq: 9
 }
 
-get {
-  url: http://localhost:8082/
-  body: none
+post {
+  url: http://localhost:8082/ips
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+      "ip_address": "::1",
+      "label": "Localhost Server IP Address (IPv6)",
+      "recorder_id": 11
+  }
 }

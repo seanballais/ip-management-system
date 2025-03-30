@@ -9,9 +9,10 @@ class IPAddress(SQLModel, table=True):
     created_on: datetime = Field(default=datetime.now(timezone.utc),
                                  nullable=False)
     ip_address: str = Field(index=True)
-    label: str
+    label: str = Field(unique=True)
     comment: typing.Optional[str]
     recorder_id: typing.Optional[int]
+    is_deleted: bool = Field(default=False)
 
     events: list['IPAddressEvent'] = Relationship(back_populates='ip_address')
 
