@@ -7,13 +7,31 @@ services:
       - ./services/auth/:/app
     env_file:
       - services/auth/env/auth.env
-    command: fastapi dev auth/main.py --host 0.0.0.0 --port 8081
+    command: fastapi dev auth/main.py --host 0.0.0.0 --port 8080
     ports:
-      - "8081:8081"
+      - "8081:8080"
     networks:
       - app-network
     depends_on:
       auth-db:
+        condition: service_started
+        restart: true
+        required: true
+  ip:
+    build:
+      context: services/ip
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/ip/:/app
+    env_file:
+      - services/auth/env/auth.env
+    command: fastapi dev ip/main.py --host 0.0.0.0 --port 8080
+    ports:
+      - "8082:8080"
+    networks:
+      - app-network
+    depends_on:
+      ip-db:
         condition: service_started
         restart: true
         required: true
@@ -24,11 +42,22 @@ services:
     env_file:
       - docker/auth.env
     ports:
-      - "5433:5433"
+      - "5433:5432"
+    networks:
+      - app-network
+  ip-db:
+    image: postgres:17-alpine
+    volumes:
+      - ip-db-data:/var/lib/postgresql/data
+    env_file:
+      - docker/ip.env
+    ports:
+      - "5434:5432"
     networks:
       - app-network
 volumes:
   auth-db-data:
+  ip-db-data:
 networks:
   app-network:
     driver: bridge
