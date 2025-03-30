@@ -3,6 +3,7 @@ import typing
 from sqlmodel import create_engine, Session, SQLModel
 
 from .config import settings
+from .models import IPAddress, IPAddressEventType, IPAddressEvent
 
 DATABASE_URL: str = f'{settings.db_scheme}://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}'
 engine = create_engine(DATABASE_URL)

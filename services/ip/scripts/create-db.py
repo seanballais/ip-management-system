@@ -9,23 +9,34 @@ sys.path.append(str(src_path))
 
 from ip import db
 from ip.db import get_session
-from ip.models import User, UserEvent, UserEventType, BlacklistedToken
+from ip.models import IPAddress, IPAddressEventType, IPAddressEvent
 
 
 def main():
     db.create_db_and_tables()
 
     # Pre-populate the user event type table.
-    user_event_types: list[str] = ['login', 'logout']
-    for event_type in user_event_types:
+    event_types: list[str] = [
+        'ip_address_added',
+        'ip_address_modified_ip',
+        'ip_address_modified_ip_label',
+        'ip_address_modified_ip_comment',
+        'ip_address_modified_ip_label_comment',
+        'ip_address_modified_label',
+        'ip_address_modified_label_comment',
+        'ip_address_modified_comment',
+        'ip_address_deleted'
+    ]
+    for event_type in event_types:
         with next(get_session()) as session:
             # Check first if the user event types are already in the database.
             statement: Select = (
-                select(UserEventType).where(UserEventType.name == event_type)
+                select(IPAddressEventType).where(
+                    IPAddressEventType.name == event_type)
             )
             event_exists: bool = bool(session.exec(statement).first())
             if not event_exists:
-                session.add(UserEventType(name=event_type))
+                session.add(IPAddressEventType(name=event_type))
 
             session.commit()
 
