@@ -69,7 +69,7 @@ router: APIRouter = APIRouter()
 
 @router.post('/ips')
 async def new_ip_address(data: AddNewIPAddressData,
-                         session: Session = Depends(get_session)):
+                         session: Session = Depends(get_session)) -> dict:
     if not _is_ip_address_valid(data.ip_address):
         raise _get_error_details_exception(422,
                                            RouteErrorCode.INVALID_IP_ADDRESS)
