@@ -1,6 +1,6 @@
 # Specifies the path where the env file that a service will use will be
 # generated to.
-target_path = "services/ip/env/auth.env"
+target_path = "services/ip/env/ip.env"
 
 # Specifies the path where the env file that will be used by Docker will be
 # generated to.
