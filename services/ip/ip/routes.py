@@ -11,7 +11,8 @@ from sqlmodel import Session, select
 from . import models
 from .encode import get_ip_address_dict
 from .db import get_session
-from .schema import AddNewIPAddressData, UpdateNewIPAddressData
+from .schema import (AddNewIPAddressData, DeleteIPAddressData,
+                     UpdateIPAddressData)
 
 
 class RouteErrorCode(Enum):
@@ -105,7 +106,7 @@ async def new_ip_address(data: AddNewIPAddressData,
 
 
 @router.patch('/ips/{ip_address_id}')
-async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
+async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
                             session: Session = Depends(get_session)) -> dict:
     statement: Select = select(models.IPAddress).where(
         models.IPAddress.id == ip_address_id)
@@ -114,7 +115,7 @@ async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
         raise _get_error_details_exception(404,
                                            RouteErrorCode.NONEXISTENT_IP_ADDRESS)
 
-    old_ip_address: IPAddressData = IPAddressData.from_model(ip_address)
+    old_ip_address_data: IPAddressData = IPAddressData.from_model(ip_address)
 
     # Validate inputs first.
     ip_address_updated: bool = False
@@ -170,11 +171,38 @@ async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
     elif not ip_address_updated and not label_updated and comment_updated:
         event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_COMMENT
 
-    _log_event(ip_address, event_type, data.updater_id, old_ip_address,
+    _log_event(ip_address, event_type, data.updater_id, old_ip_address_data,
                session)
 
     return {
         'data': ip_address_data
+    }
+
+
+@router.delete('/ips/{ip_address_id}')
+async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
+                            session: Session = Depends(get_session)) -> dict:
+    statement: Select = select(models.IPAddress).where(
+        models.IPAddress.id == ip_address_id)
+    ip_address: models.IPAddress = session.exec(statement).first()
+    if ip_address is None:
+        raise _get_error_details_exception(404,
+                                           RouteErrorCode.NONEXISTENT_IP_ADDRESS)
+
+    old_ip_address_data: IPAddressData = IPAddressData.from_model(ip_address)
+
+    ip_address.is_deleted = True
+    session.add(ip_address)
+    session.commit()
+    session.refresh(ip_address)
+
+    _log_event(ip_address, IPAddressEventType.IP_ADDRESS_DELETED,
+               data.deleter_id, old_ip_address_data, session)
+
+    return {
+        'data': {
+            'success': True
+        }
     }
 
 

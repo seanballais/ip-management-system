@@ -10,8 +10,12 @@ class AddNewIPAddressData(BaseModel):
     recorder_id: int
 
 
-class UpdateNewIPAddressData(BaseModel):
+class UpdateIPAddressData(BaseModel):
     ip_address: typing.Optional[str] = None
     label: typing.Optional[str] = None
     comment: typing.Optional[str] = None
     updater_id: int
+
+
+class DeleteIPAddressData(BaseModel):
+    deleter_id: int
