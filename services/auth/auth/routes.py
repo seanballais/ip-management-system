@@ -41,6 +41,7 @@ class RouteErrorCode(Enum):
 class UserEventType(Enum):
     LOGIN = 'login'
     LOGOUT = 'logout'
+    REGISTER = 'register'
 
 
 router: APIRouter = APIRouter()
@@ -59,6 +60,8 @@ async def register(data: RegistrationData,
     except IntegrityError:
         raise _get_error_details_exception(409,
                                            RouteErrorCode.UNAVAILABLE_USERNAME)
+
+    _log_user_event(user, UserEventType.REGISTER, session)
 
     # Create access and refresh tokens.
     user_data: dict = get_user_dict(user)

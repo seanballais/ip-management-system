@@ -16,7 +16,7 @@ def main():
     db.create_db_and_tables()
 
     # Pre-populate the user event type table.
-    user_event_types: list[str] = ['login', 'logout']
+    user_event_types: list[str] = ['login', 'logout', 'register']
     for event_type in user_event_types:
         with next(get_session()) as session:
             # Check first if the user event types are already in the database.
