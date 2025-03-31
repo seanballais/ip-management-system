@@ -1,0 +1,19 @@
+meta {
+  name: Logout
+  type: http
+  seq: 16
+}
+
+post {
+  url: http://localhost:8083/logout
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzQzNDQ1OTg0fQ.YS4t90XOGf4ZBGVgt13knEgnhe1a6Eu8XePbvuzifMU",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoicmVmcmVzaF90b2tlbiIsImV4cCI6MTc0MzQ0ODY4NH0.C8IN2Bub3SQ92kgLlVx5H1SDoopBnZklCFCCdnSoiTo"
+  }
+  
+}

@@ -41,3 +41,17 @@ async def login(data: LoginData) -> dict:
     resp: Response = requests.post(url, json=request_data)
 
     return resp.json()
+
+
+@router.post('/logout')
+async def logout(data: LogoutData) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/logout'
+
+    request_data: dict = {
+        'access_token': data.access_token,
+        'refresh_token': data.refresh_token
+    }
+
+    resp: Response = requests.post(url, json=request_data)
+
+    return resp.json()
