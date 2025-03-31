@@ -137,15 +137,16 @@ async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
         ip_address.comment = data.comment
         comment_updated = True
 
-    session.add(ip_address)
-    try:
-        session.commit()
-    except IntegrityError:
-        # The only time we will likely get an IntegrityError is when we try to
-        # update the label of an IP address with a label already used by
-        # another IP address.
-        raise _get_error_details_exception(409,
-                                           RouteErrorCode.UNAVAILABLE_LABEL)
+    if data.ip_address or data.label or data.comment:
+        session.add(ip_address)
+        try:
+            session.commit()
+        except IntegrityError:
+            # The only time we will likely get an IntegrityError is when we try to
+            # update the label of an IP address with a label already used by
+            # another IP address.
+            raise _get_error_details_exception(409,
+                                               RouteErrorCode.UNAVAILABLE_LABEL)
 
     session.refresh(ip_address)
 
