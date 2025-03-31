@@ -221,7 +221,8 @@ async def get_ip_addresses(items_per_page: Annotated[int, Query(le=50)] = 10,
         select(func.count('*')).select_from(statement.subquery()))
 
     total_num_items: int = session.scalar(
-        select(func.count(models.IPAddress.id)))
+        select(func.count(models.IPAddress.id))
+        .where(not_(models.IPAddress.is_deleted)))
 
     ip_addresses: TupleResult[models.IPAddress] = session.exec(statement)
     data: dict = {
