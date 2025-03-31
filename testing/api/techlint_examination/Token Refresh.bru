@@ -1,0 +1,17 @@
+meta {
+  name: Token Refresh
+  type: http
+  seq: 19
+}
+
+get {
+  url: http://localhost:8081/token/refresh
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoicmVmcmVzaF90b2tlbiIsImV4cCI6MTc0MzQ0OTI3NH0.whVCqHxWb1j4UmT6zythG6wTO-Sa4-R0vvmUd9-vvzg"
+  }
+}

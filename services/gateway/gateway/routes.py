@@ -87,3 +87,16 @@ async def access_token_validate(data: AccessTokenValidationData) -> dict:
     resp: Response = requests.post(url, json=request_data)
 
     return resp.json()
+
+
+@router.get('/token/refresh')
+async def token_refresh(data: TokenRefreshData) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/token/refresh'
+
+    request_data: dict = {
+        'refresh_token': data.refresh_token
+    }
+
+    resp: Response = requests.get(url, json=request_data)
+
+    return resp.json()
