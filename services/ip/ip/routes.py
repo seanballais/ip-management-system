@@ -287,7 +287,8 @@ def _get_ip_address_object(ip_address_id,
         session = next(get_session())
 
     statement: Select = select(models.IPAddress).where(
-        models.IPAddress.id == ip_address_id)
+        models.IPAddress.id == ip_address_id,
+        not_(models.IPAddress.is_deleted))
     ip_address: models.IPAddress = session.exec(statement).first()
 
     return ip_address
