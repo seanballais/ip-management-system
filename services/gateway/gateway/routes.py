@@ -27,3 +27,17 @@ async def register(data: RegistrationData) -> dict:
     resp: Response = requests.put(url, json=request_data)
 
     return resp.json()
+
+
+@router.post('/login')
+async def login(data: LoginData) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/login'
+
+    request_data: dict = {
+        'username': data.username,
+        'password': data.password
+    }
+
+    resp: Response = requests.post(url, json=request_data)
+
+    return resp.json()
