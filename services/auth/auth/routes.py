@@ -152,7 +152,8 @@ async def logout(data: LogoutData,
 
 @router.get('/users')
 async def users(data: UsersData,
-                user_id: Annotated[list[int] | None, Query(alias='id')] = None,
+                user_ids: Annotated[
+                    list[int] | None, Query(alias='id')] = None,
                 session: Session = Depends(get_session)) -> dict:
     try:
         validate_access_token(data.access_token, session)
@@ -160,17 +161,18 @@ async def users(data: UsersData,
         raise _get_error_details_exception(401,
                                            RouteErrorCode.INVALID_ACCESS_TOKEN)
 
-    or_expressions: list[BinaryExpression] = list(
-        map(lambda id_: models.User.id == id_, user_id)
-    )
-    statement: Select = (
-        select(models.User).where(or_(*or_expressions)).order_by(
-            models.User.id)
-    )
-    results: TupleResult[models.User] = session.exec(statement)
     user_dicts: list[dict] = []
-    for user in results:
-        user_dicts.append(get_user_dict(user))
+    if user_ids:
+        or_expressions: list[BinaryExpression] = list(
+            map(lambda id_: models.User.id == id_, user_ids)
+        )
+        statement: Select = (
+            select(models.User).where(or_(*or_expressions)).order_by(
+                models.User.id)
+        )
+        results: TupleResult[models.User] = session.exec(statement)
+        for user in results:
+            user_dicts.append(get_user_dict(user))
 
     return {
         'data': {

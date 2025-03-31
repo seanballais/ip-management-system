@@ -55,3 +55,22 @@ async def logout(data: LogoutData) -> dict:
     resp: Response = requests.post(url, json=request_data)
 
     return resp.json()
+
+
+@router.get('/users')
+async def users(data: UsersData,
+                user_ids: Annotated[
+                    list[int] | None, Query(alias='id')] = None) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/users'
+
+    request_data: dict = {
+        'access_token': data.access_token
+    }
+    query_params: dict = {}
+    if user_ids:
+        query_params['id'] = user_ids
+
+    resp: Response = requests.get(url, json=request_data, params=query_params)
+    print(resp)
+
+    return resp.json()
