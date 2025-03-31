@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-import typing
 from enum import Enum
 import ipaddress
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import Select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import Select, func
+from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session, select
+from sqlmodel import Session, select, not_, col
 
 from . import models
 from .encode import get_ip_address_dict
@@ -36,9 +37,9 @@ class IPAddressEventType(Enum):
 
 @dataclass
 class IPAddressData:
-    ip_address: typing.Optional[str]
-    label: typing.Optional[str]
-    comment: typing.Optional[str]
+    ip_address: Optional[str]
+    label: Optional[str]
+    comment: Optional[str]
 
     @staticmethod
     def create_empty():
@@ -204,6 +205,46 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
     }
 
 
+@router.get('/ips')
+async def get_ip_addresses(items_per_page: Annotated[int, Query(le=50)] = 10,
+                           page_number: Annotated[int, Query()] = 0,
+                           session: Session = Depends(get_session)) -> dict:
+    statement: Select = (select(models.IPAddress)
+                         .where(not_(models.IPAddress.is_deleted))
+                         .order_by(col(models.IPAddress.created_on).desc())
+                         .offset(page_number * items_per_page)
+                         .limit(items_per_page))
+
+    # This line below is taken from the fastapi-pagination project:
+    # - https://github.com/uriyyo/fastapi-pagination/blob/1b718ff7b0c9087f684c38386f0e54ef5a3eec29/fastapi_pagination/ext/sqlmodel.py
+    num_items: int = session.scalar(
+        select(func.count('*')).select_from(statement.subquery()))
+
+    total_num_items: int = session.scalar(
+        select(func.count(models.IPAddress.id)))
+
+    ip_addresses: TupleResult[models.IPAddress] = session.exec(statement)
+    data: dict = {
+        'count': num_items,
+        'num_total_items': total_num_items,
+        'page_number': page_number,
+        'ips': []
+    }
+    for ip in ip_addresses:
+        data['ips'].append({
+            'id': ip.id,
+            'created_on': ip.created_on,
+            'ip_address': ip.ip_address,
+            'label': ip.label,
+            'comment': ip.comment,
+            'recorder_id': ip.recorder_id
+        })
+
+    return {
+        'data': data
+    }
+
+
 def _get_ip_address_object(ip_address_id,
                            session: Session = None) -> models.IPAddress:
     if session is None:
@@ -227,7 +268,7 @@ def _is_ip_address_valid(ip_address: str) -> bool:
 
 def _log_event(ip_address: models.IPAddress,
                event_type: IPAddressEventType,
-               trigger_user_id: typing.Optional[int],
+               trigger_user_id: Optional[int],
                old_ip_address_data: IPAddressData,
                session: Session = None):
     if session is None:
