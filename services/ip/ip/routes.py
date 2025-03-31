@@ -108,9 +108,8 @@ async def new_ip_address(data: AddNewIPAddressData,
 @router.patch('/ips/{ip_address_id}')
 async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
                             session: Session = Depends(get_session)) -> dict:
-    statement: Select = select(models.IPAddress).where(
-        models.IPAddress.id == ip_address_id)
-    ip_address: models.IPAddress = session.exec(statement).first()
+    ip_address: models.IPAddress = _get_ip_address_object(ip_address_id,
+                                                          session)
     if ip_address is None:
         raise _get_error_details_exception(404,
                                            RouteErrorCode.NONEXISTENT_IP_ADDRESS)
@@ -182,9 +181,8 @@ async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
 @router.delete('/ips/{ip_address_id}')
 async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
                             session: Session = Depends(get_session)) -> dict:
-    statement: Select = select(models.IPAddress).where(
-        models.IPAddress.id == ip_address_id)
-    ip_address: models.IPAddress = session.exec(statement).first()
+    ip_address: models.IPAddress = _get_ip_address_object(ip_address_id,
+                                                          session)
     if ip_address is None:
         raise _get_error_details_exception(404,
                                            RouteErrorCode.NONEXISTENT_IP_ADDRESS)
@@ -204,6 +202,18 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
             'success': True
         }
     }
+
+
+def _get_ip_address_object(ip_address_id,
+                           session: Session = None) -> models.IPAddress:
+    if session is None:
+        session = next(get_session())
+
+    statement: Select = select(models.IPAddress).where(
+        models.IPAddress.id == ip_address_id)
+    ip_address: models.IPAddress = session.exec(statement).first()
+
+    return ip_address
 
 
 def _is_ip_address_valid(ip_address: str) -> bool:
