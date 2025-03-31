@@ -7,7 +7,7 @@ from sqlalchemy import Select, func
 from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.elements import BinaryExpression
-from sqlmodel import Session, select, or_
+from sqlmodel import Session, select, or_, col
 
 from . import models
 from .db import get_session
@@ -236,7 +236,7 @@ async def audit(data: AuditData,
         raise _get_error_details_exception(403, RouteErrorCode.ACCESS_DENIED)
 
     statement: Select = (select(models.UserEvent)
-                         .order_by(models.UserEvent.recorded_on)
+                         .order_by(col(models.UserEvent.recorded_on).desc())
                          .offset(page_number * items_per_page)
                          .limit(items_per_page))
     # This line below is taken from the fastapi-pagination project:
