@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Select, func
 from sqlalchemy.engine import TupleResult
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql.elements import BinaryExpression, or_
 from sqlmodel import Session, select, not_, col
 
 from . import models
@@ -206,14 +207,27 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
 
 
 @router.get('/ips')
-async def get_ip_addresses(items_per_page: Annotated[int, Query(le=50)] = 10,
-                           page_number: Annotated[int, Query()] = 0,
-                           session: Session = Depends(get_session)) -> dict:
-    statement: Select = (select(models.IPAddress)
-                         .where(not_(models.IPAddress.is_deleted))
-                         .order_by(col(models.IPAddress.created_on).desc())
-                         .offset(page_number * items_per_page)
-                         .limit(items_per_page))
+async def get_ip_addresses(
+        ip_ids: Annotated[list[int] | None, Query(alias='id')] = None,
+        items_per_page: Annotated[int, Query(le=50)] = 10,
+        page_number: Annotated[int, Query()] = 0,
+        session: Session = Depends(get_session)) -> dict:
+    if ip_ids:
+        or_expressions: list[BinaryExpression] = list(
+            map(lambda id_: models.IPAddress.id == id_, ip_ids)
+        )
+        statement: Select = (
+            select(models.IPAddress)
+            .where(not_(models.IPAddress.is_deleted))
+            .where(or_(*or_expressions))
+            .order_by(col(models.IPAddress.created_on).desc()))
+    else:
+        statement: Select = (
+            select(models.IPAddress)
+            .where(not_(models.IPAddress.is_deleted))
+            .order_by(col(models.IPAddress.created_on).desc())
+            .offset(page_number * items_per_page)
+            .limit(items_per_page))
 
     # This line below is taken from the fastapi-pagination project:
     # - https://github.com/uriyyo/fastapi-pagination/blob/1b718ff7b0c9087f684c38386f0e54ef5a3eec29/fastapi_pagination/ext/sqlmodel.py

@@ -6,7 +6,9 @@ import requests
 from requests import Response
 
 from .schema import (RegistrationData, LoginData, LogoutData, UsersData,
-                     AccessTokenValidationData, TokenRefreshData, AuditData)
+                     AccessTokenValidationData, TokenRefreshData, AuditData,
+                     AddNewIPAddressData, UpdateIPAddressData,
+                     DeleteIPAddressData)
 
 router: APIRouter = APIRouter()
 
@@ -100,3 +102,8 @@ async def token_refresh(data: TokenRefreshData) -> dict:
     resp: Response = requests.get(url, json=request_data)
 
     return resp.json()
+
+
+@router.post('/ips')
+async def new_ip_address(data: AddNewIPAddressData) -> dict:
+    return {}

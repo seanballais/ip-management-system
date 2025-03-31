@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -31,3 +33,21 @@ class TokenRefreshData(BaseModel):
 
 class AuditData(BaseModel):
     access_token: str
+
+
+class AddNewIPAddressData(BaseModel):
+    ip_address: str
+    label: str
+    comment: Optional[str] = None
+    recorder_id: int
+
+
+class UpdateIPAddressData(BaseModel):
+    ip_address: Optional[str] = None
+    label: Optional[str] = None
+    comment: Optional[str] = None
+    updater_id: int
+
+
+class DeleteIPAddressData(BaseModel):
+    deleter_id: int
