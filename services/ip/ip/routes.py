@@ -232,14 +232,7 @@ async def get_ip_addresses(items_per_page: Annotated[int, Query(le=50)] = 10,
         'ips': []
     }
     for ip in ip_addresses:
-        data['ips'].append({
-            'id': ip.id,
-            'created_on': ip.created_on,
-            'ip_address': ip.ip_address,
-            'label': ip.label,
-            'comment': ip.comment,
-            'recorder_id': ip.recorder_id
-        })
+        data['ips'].append(get_ip_address_dict(ip))
 
     return {
         'data': data
