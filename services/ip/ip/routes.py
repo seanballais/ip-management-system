@@ -239,6 +239,48 @@ async def get_ip_addresses(items_per_page: Annotated[int, Query(le=50)] = 10,
     }
 
 
+@router.get('/audit-log')
+async def get_audit_log(items_per_page: Annotated[int, Query(le=50)] = 10,
+                        page_number: Annotated[int, Query()] = 0,
+                        session: Session = Depends(get_session)) -> dict:
+    statement: Select = (
+        select(models.IPAddressEvent)
+        .order_by(
+            col(models.IPAddressEvent.recorded_on).desc())
+        .offset(page_number * items_per_page)
+        .limit(items_per_page))
+
+    # This line below is taken from the fastapi-pagination project:
+    # - https://github.com/uriyyo/fastapi-pagination/blob/1b718ff7b0c9087f684c38386f0e54ef5a3eec29/fastapi_pagination/ext/sqlmodel.py
+    num_items: int = session.scalar(
+        select(func.count('*')).select_from(statement.subquery()))
+
+    total_num_items: int = session.scalar(
+        select(func.count(models.IPAddressEvent.id)))
+
+    events: TupleResult[models.IPAddressEvent] = session.exec(statement)
+    data: dict = {
+        'count': num_items,
+        'num_total_items': total_num_items,
+        'page_number': page_number,
+        'events': []
+    }
+    for event in events:
+        data['events'].append({
+            'id': event.id,
+            'type': event.event_type.name,
+            'recorded_on': event.recorded_on,
+            'ip': get_ip_address_dict(event.ip_address),
+            'trigger_user_id': event.trigger_user_id,
+            'old_data': event.old_data,
+            'new_data': event.new_data
+        })
+
+    return {
+        'data': data
+    }
+
+
 def _get_ip_address_object(ip_address_id,
                            session: Session = None) -> models.IPAddress:
     if session is None:

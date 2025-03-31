@@ -1,0 +1,16 @@
+meta {
+  name: IP Get Audit Log
+  type: http
+  seq: 13
+}
+
+get {
+  url: http://localhost:8082/ips/?items_per_page=2&page_number=0
+  body: none
+  auth: inherit
+}
+
+params:query {
+  items_per_page: 2
+  page_number: 0
+}
