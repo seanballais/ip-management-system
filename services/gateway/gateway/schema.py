@@ -39,7 +39,7 @@ class AddNewIPAddressData(BaseModel):
     ip_address: str
     label: str
     comment: Optional[str] = None
-    recorder_id: int
+    access_token: str
 
 
 class UpdateIPAddressData(BaseModel):
