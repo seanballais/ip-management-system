@@ -1,0 +1,19 @@
+meta {
+  name: Registration
+  type: http
+  seq: 14
+}
+
+put {
+  url: http://localhost:8083/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "seanballais",
+    "password1": "12345",
+    "password2": "12345"
+  }
+}
