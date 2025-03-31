@@ -35,6 +35,26 @@ services:
         condition: service_started
         restart: true
         required: true
+  gateway:
+    build:
+      context: services/gateway
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/gateway/:/app
+    command: fastapi dev gateway/main.py --host 0.0.0.0 --port 8080
+    ports:
+      - "8083:8080"
+    networks:
+      - app-network
+    depends_on:
+      auth:
+        condition: service_started
+        restart: true
+        required: true
+      ip:
+        condition: service_started
+        restart: true
+        required: true
   auth-db:
     image: postgres:17-alpine
     volumes:
