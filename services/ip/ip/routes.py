@@ -30,6 +30,7 @@ class IPAddressEventType(Enum):
     IP_ADDRESS_MODIFIED_LABEL_COMMENT: str = 'ip_address_modified_label_comment'
     IP_ADDRESS_MODIFIED_COMMENT: str = 'ip_address_modified_comment'
     IP_ADDRESS_DELETED: str = 'ip_address_deleted'
+    NONE: str = 'none'  # To be used a default value only on creation of app
 
 
 @dataclass
@@ -57,6 +58,8 @@ class IPAddressData:
 
         if self.comment:
             d['comment'] = self.label
+
+        return d
 
 
 @dataclass
@@ -106,21 +109,72 @@ async def update_ip_address(ip_address_id: int, data: UpdateNewIPAddressData,
                             session: Session = Depends(get_session)) -> dict:
     statement: Select = select(models.IPAddress).where(
         models.IPAddress.id == ip_address_id)
-    print(type(data.ip_address))
     ip_address: models.IPAddress = session.exec(statement).first()
     if ip_address is None:
         raise _get_error_details_exception(404,
                                            RouteErrorCode.NONEXISTENT_IP_ADDRESS)
 
+    old_ip_address: IPAddressData = IPAddressData.from_model(ip_address)
+
     # Validate inputs first.
+    ip_address_updated: bool = False
+    label_updated: bool = False
+    comment_updated: bool = False
+
     if data.ip_address:
         if _is_ip_address_valid(data.ip_address):
             ip_address.ip_address = data.ip_address
+            ip_address_updated = True
         else:
             raise _get_error_details_exception(422,
                                                RouteErrorCode.INVALID_IP_ADDRESS)
 
-    return {}
+    if data.label:
+        ip_address.label = data.label
+        label_updated = True
+
+    if data.comment:
+        ip_address.comment = data.comment
+        comment_updated = True
+
+    session.add(ip_address)
+    try:
+        session.commit()
+    except IntegrityError:
+        # The only time we will likely get an IntegrityError is when we try to
+        # update the label of an IP address with a label already used by
+        # another IP address.
+        raise _get_error_details_exception(409,
+                                           RouteErrorCode.UNAVAILABLE_LABEL)
+
+    session.refresh(ip_address)
+
+    ip_address_data: dict = {
+        'ip': get_ip_address_dict(ip_address)
+    }
+
+    event_type: IPAddressEventType = IPAddressEventType.NONE
+    if ip_address_updated and not label_updated and not comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_IP
+    elif ip_address_updated and label_updated and not comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_IP_LABEL
+    elif ip_address_updated and not label_updated and comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_IP_COMMENT
+    elif ip_address_updated and label_updated and comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_IP_LABEL_COMMENT
+    elif not ip_address_updated and label_updated and not comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_LABEL
+    elif not ip_address_updated and label_updated and comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_LABEL_COMMENT
+    elif not ip_address_updated and not label_updated and comment_updated:
+        event_type = IPAddressEventType.IP_ADDRESS_MODIFIED_COMMENT
+
+    _log_event(ip_address, event_type, data.updater_id, old_ip_address,
+               session)
+
+    return {
+        'data': ip_address_data
+    }
 
 
 def _is_ip_address_valid(ip_address: str) -> bool:

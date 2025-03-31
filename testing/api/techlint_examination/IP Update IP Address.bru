@@ -5,7 +5,17 @@ meta {
 }
 
 patch {
-  url: http://localhost:8082/ips/2
-  body: none
+  url: http://localhost:8082/ips/4
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+      "ip_address": "192.168.2.1",
+      "label": "Test IP Address",
+      "comment": "For home use only",
+      "updater_id": 11
+  }
+  
 }
