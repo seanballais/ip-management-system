@@ -74,3 +74,16 @@ async def users(data: UsersData,
     print(resp)
 
     return resp.json()
+
+
+@router.post('/token/access/validate')
+async def access_token_validate(data: AccessTokenValidationData) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/token/access/validate'
+
+    request_data: dict = {
+        'access_token': data.access_token
+    }
+
+    resp: Response = requests.post(url, json=request_data)
+
+    return resp.json()

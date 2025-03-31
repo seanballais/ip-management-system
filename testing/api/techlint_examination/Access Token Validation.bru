@@ -1,24 +1,18 @@
 meta {
-  name: Users
+  name: Access Token Validation
   type: http
-  seq: 17
+  seq: 18
 }
 
-get {
-  url: http://localhost:8083/users
+post {
+  url: http://localhost:8083/token/access/validate
   body: json
   auth: inherit
-}
-
-params:query {
-  ~id: 11
-  ~id: 19
-  ~id: 21
-  ~id: 15
 }
 
 body:json {
   {
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzQzNDQ2NTc0fQ.mLuj2FKS67NNBKFDP2FirSi6g0i0wo9rQ_vK53DfoRE"
   }
+  
 }
