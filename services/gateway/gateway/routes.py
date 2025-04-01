@@ -200,7 +200,15 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
     except HTTPException:
         raise
 
-    return {}
+    url: str = f'{IP_SERVICE_URL}/ips/{ip_address_id}'
+    request_data: dict = {
+        'deleter_id': user_data['id']
+    }
+
+    resp: requests.Response = requests.delete(url, json=request_data)
+    response.status_code = resp.status_code
+
+    return resp.json()
 
 
 def _check_action_validity(ip_address_id: int, user_id: int,

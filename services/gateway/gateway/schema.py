@@ -50,4 +50,4 @@ class UpdateIPAddressData(BaseModel):
 
 
 class DeleteIPAddressData(BaseModel):
-    deleter_id: int
+    access_token: str
