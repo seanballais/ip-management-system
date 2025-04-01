@@ -276,10 +276,8 @@ async def get_users_audit_log(data: GetAuditLogoData, response: Response,
 
 @router.get('/audit-log/ips')
 async def get_ips_audit_log(data: GetAuditLogoData, response: Response,
-                            items_per_page: Annotated[
-                                int, Query(le=50)] = 10,
-                            page_number: Annotated[
-                                int, Query()] = 0) -> dict:
+                            items_per_page: Annotated[int, Query(le=50)] = 10,
+                            page_number: Annotated[int, Query()] = 0) -> dict:
     # We need to check if the user is a superuser here, since the IP
     # management service's audit log endpoint does not check for it.
     try:
