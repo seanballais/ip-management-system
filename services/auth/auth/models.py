@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import typing
 
-from sqlmodel import Field, SQLModel, Session, Relationship
+from sqlmodel import Field, Relationship, SQLModel, Session, text
 
 from .db import get_session
 from .security import hash_password
@@ -26,8 +26,11 @@ class UserEventType(SQLModel, table=True):
 
 class UserEvent(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
-    recorded_on: datetime = Field(default=datetime.now(timezone.utc),
-                                  nullable=False)
+    # From:
+    #  - https://github.com/fastapi/sqlmodel/issues/594#issuecomment-1672270907
+    recorded_on: datetime = Field(
+        nullable=False,
+        sa_column_kwargs={'server_default': text('CURRENT_TIMESTAMP')})
 
     user_id: int | None = Field(default=None, foreign_key='user.id')
     user_event_type_id: int | None = Field(default=None,
