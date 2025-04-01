@@ -115,20 +115,10 @@ async def token_refresh(data: TokenRefreshData, response: Response) -> dict:
 async def new_ip_address(data: AddNewIPAddressData,
                          response: Response) -> dict:
     # Authenticate the access token first.
-    auth_url: str = f'{AUTH_SERVICE_URL}/token/access/validate'
-
-    auth_request_data: dict = {
-        'access_token': data.access_token
-    }
-
-    auth_resp: requests.Response = requests.post(auth_url,
-                                                 json=auth_request_data)
-    auth_resp_json: dict = auth_resp.json()
-    if 200 <= auth_resp.status_code <= 299:
-        user_data = auth_resp_json['data']
-    else:
-        raise HTTPException(auth_resp.status_code,
-                            detail=auth_resp_json['detail'])
+    try:
+        user_data: dict = _authenticate_access_token(data.access_token)
+    except HTTPException:
+        raise
 
     # Attempt to add a new IP address.
     ip_url: str = f'{IP_SERVICE_URL}/ips'
@@ -144,3 +134,26 @@ async def new_ip_address(data: AddNewIPAddressData,
     response.status_code = ip_resp.status_code
 
     return ip_resp.json()
+
+
+@router.patch('/ips/{ip_address_id}')
+async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
+                            response: Response) -> dict:
+    return {}
+
+
+def _authenticate_access_token(access_token: str) -> dict:
+    auth_url: str = f'{AUTH_SERVICE_URL}/token/access/validate'
+
+    auth_request_data: dict = {
+        'access_token': access_token
+    }
+
+    auth_resp: requests.Response = requests.post(auth_url,
+                                                 json=auth_request_data)
+    auth_resp_json: dict = auth_resp.json()
+    if 200 <= auth_resp.status_code <= 299:
+        return auth_resp_json['data']
+    else:
+        raise HTTPException(auth_resp.status_code,
+                            detail=auth_resp_json['detail'])
