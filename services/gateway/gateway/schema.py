@@ -31,7 +31,7 @@ class TokenRefreshData(BaseModel):
     refresh_token: str
 
 
-class AuditData(BaseModel):
+class GetAuditLogoData(BaseModel):
     access_token: str
 
 
