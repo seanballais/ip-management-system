@@ -46,7 +46,7 @@ class UpdateIPAddressData(BaseModel):
     ip_address: Optional[str] = None
     label: Optional[str] = None
     comment: Optional[str] = None
-    updater_id: int
+    access_token: str
 
 
 class DeleteIPAddressData(BaseModel):

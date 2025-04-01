@@ -1,0 +1,19 @@
+meta {
+  name: Update IP Address
+  type: http
+  seq: 21
+}
+
+patch {
+  url: http://localhost:8082/ips/12
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "ip_address": "192.168.1.2",
+      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzQzNDk3MzgwfQ.6bEE7aQnhWOIFygSlS6lmRpoL0XM85Vy0VgKnXg3_kA"
+  }
+  
+}
