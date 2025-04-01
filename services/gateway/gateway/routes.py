@@ -240,7 +240,11 @@ async def get_ip_addresses(data: GetIPAddressData, response: Response,
         recorder_ids.append(ip['recorder_id'])
 
     # Get user info.
-    users_data: dict = _get_users_data(recorder_ids, data.access_token)
+    try:
+        users_data: dict = _get_users_data(recorder_ids, data.access_token)
+    except HTTPException:
+        raise
+
     for ip in ips_resp_json['data']['ips']:
         recorder_id: int = ip['recorder_id']
 
@@ -270,6 +274,60 @@ async def get_users_audit_log(data: GetAuditLogoData, response: Response,
     return resp.json()
 
 
+@router.get('/audit-log/ips')
+async def get_ips_audit_log(data: GetAuditLogoData, response: Response,
+                            items_per_page: Annotated[
+                                int, Query(le=50)] = 10,
+                            page_number: Annotated[
+                                int, Query()] = 0) -> dict:
+    # We need to check if the user is a superuser here, since the IP
+    # management service's audit log endpoint does not check for it.
+    try:
+        user_data: dict = _authenticate_access_token(data.access_token)
+    except HTTPException:
+        raise
+
+    if not user_data['is_superuser']:
+        raise _get_error_details_exception(403,
+                                           RouteErrorCode.FORBIDDEN_ACTION)
+
+    url: str = f'{IP_SERVICE_URL}/audit-log'
+
+    ips_resp: requests.Response = _get_audit_log_response(url,
+                                                          data.access_token,
+                                                          items_per_page,
+                                                          page_number)
+    ips_resp_json: dict = ips_resp.json()
+
+    if not (200 <= ips_resp.status_code <= 299):
+        raise HTTPException(ips_resp.status_code,
+                            detail=ips_resp_json['detail'])
+
+    user_ids: list[int] = []
+    for event in ips_resp_json['data']['events']:
+        user_ids.append(event['trigger_user_id'])
+        user_ids.append(event['ip']['recorder_id'])
+
+    try:
+        users_data: dict = _get_users_data(user_ids, data.access_token)
+    except HTTPException:
+        raise
+
+    for event in ips_resp_json['data']['events']:
+        trigger_user_id: int = event['trigger_user_id']
+        recorder_id: int = event['ip']['recorder_id']
+
+        del event['trigger_user_id']
+        del event['ip']['recorder_id']
+
+        event['trigger_user'] = users_data[trigger_user_id]
+        event['ip']['recorder']: dict = users_data[recorder_id]
+
+    response.status_code = ips_resp.status_code
+
+    return ips_resp_json
+
+
 def _get_audit_log_response(url: str, access_token: str, items_per_page: int,
                             page_number: int) -> requests.Response:
     request_data: dict = {
@@ -280,7 +338,7 @@ def _get_audit_log_response(url: str, access_token: str, items_per_page: int,
         'page_number': page_number
     }
 
-    return requests.post(url, params=params, json=request_data)
+    return requests.get(url, params=params, json=request_data)
 
 
 def _check_ip_address_action_validity(ip_address_id: int, user_id: int,
