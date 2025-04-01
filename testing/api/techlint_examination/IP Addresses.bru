@@ -1,0 +1,22 @@
+meta {
+  name: IP Addresses
+  type: http
+  seq: 23
+}
+
+get {
+  url: http://localhost:8083/ips?items_per_page=2&page_number=0
+  body: json
+  auth: inherit
+}
+
+params:query {
+  items_per_page: 2
+  page_number: 0
+}
+
+body:json {
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxOSwidXNlcm5hbWUiOiJzZWFuYmFsbGFpcyIsImlzX3N1cGVydXNlciI6ZmFsc2V9LCJ0b2tlbl90eXBlIjoiYWNjZXNzX3Rva2VuIiwiZXhwIjoxNzQzNTIxODg4fQ.PzCrECRNpUhDKYFrvgSOss6qrfRYhhmC5yp-XZpEquw"
+  }
+}

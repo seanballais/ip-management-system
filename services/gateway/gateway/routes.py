@@ -8,7 +8,7 @@ import requests
 from .schema import (RegistrationData, LoginData, LogoutData, UsersData,
                      AccessTokenValidationData, TokenRefreshData, AuditData,
                      AddNewIPAddressData, UpdateIPAddressData,
-                     DeleteIPAddressData)
+                     DeleteIPAddressData, GetIPAddressData)
 
 
 class RouteErrorCode(Enum):
@@ -211,6 +211,46 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
     return resp.json()
 
 
+@router.get('/ips')
+async def get_ip_addresses(data: GetIPAddressData, response: Response,
+                           items_per_page: Annotated[int, Query(le=50)] = 10,
+                           page_number: Annotated[int, Query()] = 0) -> dict:
+    # Authenticate the access token first.
+    try:
+        _authenticate_access_token(data.access_token)
+    except HTTPException:
+        raise
+
+    ip_url: str = f'{IP_SERVICE_URL}/ips'
+    params: dict = {
+        'items_per_page': items_per_page,
+        'page_number': page_number
+    }
+
+    ips_resp: requests.Response = requests.get(ip_url, params=params)
+    ips_resp_json: dict = ips_resp.json()
+
+    if not (200 <= ips_resp.status_code <= 299):
+        raise HTTPException(ips_resp.status_code,
+                            detail=ips_resp_json['detail'])
+
+    recorder_ids: list[int] = []
+    for ip in ips_resp_json['data']['ips']:
+        recorder_ids.append(ip['recorder_id'])
+
+    # Get user info.
+    users_data: dict = _get_users_data(recorder_ids, data.access_token)
+    for ip in ips_resp_json['data']['ips']:
+        recorder_id: int = ip['recorder_id']
+
+        del ip['recorder_id']
+
+        ip['recorder']: dict = users_data[recorder_id]
+
+    response.status_code = ips_resp.status_code
+    return ips_resp_json
+
+
 def _check_action_validity(ip_address_id: int, user_id: int,
                            is_user_superuser: bool):
     ip_address_data: dict = _get_ip_address_data(ip_address_id)
@@ -221,6 +261,31 @@ def _check_action_validity(ip_address_id: int, user_id: int,
     if ip_address_data['recorder_id'] != user_id and not is_user_superuser:
         raise _get_error_details_exception(403,
                                            RouteErrorCode.FORBIDDEN_ACTION)
+
+
+def _get_users_data(user_ids: list[int], access_token: str) -> dict:
+    url: str = f'{AUTH_SERVICE_URL}/users'
+    params: dict = {
+        'id': list(set(user_ids))
+    }
+    request_data: dict = {
+        'access_token': access_token
+    }
+
+    resp: requests.Response = requests.get(url,
+                                           params=params,
+                                           json=request_data)
+    resp_json: dict = resp.json()
+
+    if not (200 <= resp.status_code <= 299):
+        raise HTTPException(resp.status_code,
+                            detail=resp_json['detail'])
+
+    data: dict = {}
+    for user in resp_json['data']['users']:
+        data[user['id']] = user
+
+    return data
 
 
 def _authenticate_access_token(access_token: str) -> dict:

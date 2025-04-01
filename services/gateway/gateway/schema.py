@@ -51,3 +51,7 @@ class UpdateIPAddressData(BaseModel):
 
 class DeleteIPAddressData(BaseModel):
     access_token: str
+
+
+class GetIPAddressData(BaseModel):
+    access_token: str
