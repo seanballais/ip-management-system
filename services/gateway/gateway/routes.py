@@ -154,8 +154,8 @@ async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
 
     # Check if the user can edit the IP address.
     try:
-        _check_user_authorization(ip_address_id, user_data['id'],
-                                  user_data['is_superuser'])
+        _check_action_validity(ip_address_id, user_data['id'],
+                               user_data['is_superuser'])
     except HTTPException:
         raise
 
@@ -195,16 +195,16 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
 
     # Check if the user can edit the IP address.
     try:
-        _check_user_authorization(ip_address_id, user_data['id'],
-                                  user_data['is_superuser'])
+        _check_action_validity(ip_address_id, user_data['id'],
+                               user_data['is_superuser'])
     except HTTPException:
         raise
 
     return {}
 
 
-def _check_user_authorization(ip_address_id: int, user_id: int,
-                              is_user_superuser: bool):
+def _check_action_validity(ip_address_id: int, user_id: int,
+                           is_user_superuser: bool):
     ip_address_data: dict = _get_ip_address_data(ip_address_id)
     if ip_address_data is None:
         raise _get_error_details_exception(404,
