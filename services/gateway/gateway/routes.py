@@ -153,15 +153,11 @@ async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
         raise
 
     # Check if the user can edit the IP address.
-    ip_address_data: dict = _get_ip_address_data(ip_address_id)
-    if ip_address_data is None:
-        raise _get_error_details_exception(404,
-                                           RouteErrorCode.NONEXISTENT_IP_ADDRESS)
-
-    if (ip_address_data['recorder_id'] != user_data['id']
-            and not user_data['is_superuser']):
-        raise _get_error_details_exception(403,
-                                           RouteErrorCode.FORBIDDEN_ACTION)
+    try:
+        _check_user_authorization(ip_address_id, user_data['id'],
+                                  user_data['is_superuser'])
+    except HTTPException:
+        raise
 
     # And then attempt to update the IP address.
     ip_url: str = f'{IP_SERVICE_URL}/ips/{ip_address_id}'
@@ -186,6 +182,37 @@ async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
     response.status_code = ip_resp.status_code
 
     return ip_resp_json
+
+
+@router.delete('/ips/{ip_address_id}')
+async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
+                            response: Response) -> dict:
+    # Authenticate the access token first.
+    try:
+        user_data: dict = _authenticate_access_token(data.access_token)
+    except HTTPException:
+        raise
+
+    # Check if the user can edit the IP address.
+    try:
+        _check_user_authorization(ip_address_id, user_data['id'],
+                                  user_data['is_superuser'])
+    except HTTPException:
+        raise
+
+    return {}
+
+
+def _check_user_authorization(ip_address_id: int, user_id: int,
+                              is_user_superuser: bool):
+    ip_address_data: dict = _get_ip_address_data(ip_address_id)
+    if ip_address_data is None:
+        raise _get_error_details_exception(404,
+                                           RouteErrorCode.NONEXISTENT_IP_ADDRESS)
+
+    if ip_address_data['recorder_id'] != user_id and not is_user_superuser:
+        raise _get_error_details_exception(403,
+                                           RouteErrorCode.FORBIDDEN_ACTION)
 
 
 def _authenticate_access_token(access_token: str) -> dict:
