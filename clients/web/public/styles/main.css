@@ -1,0 +1,157 @@
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/thin.ttf") format("truetype");
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/thin-italic.ttf") format("truetype");
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/extra-light.ttf") format("truetype");
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/extra-light-italic.ttf") format("truetype");
+    font-weight: 200;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/light-italic.ttf") format("truetype");
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/italic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/medium-italic.ttf") format("truetype");
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/semibold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/semibold-italic.ttf") format("truetype");
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("../fonts/ibm-plex-mono/bold-italic.ttf") format("truetype");
+    font-weight: 700;
+    font-style: italic;
+}
+
+:root {
+    --golden-ratio: 1.618;
+    --font-size-base: 1rem; /* Usually defaults to 16px. */
+    --font-size-5: calc(var(--font-size-base) * var(--golden-ratio));
+    --font-size-4: calc(var(--font-size-5) * var(--golden-ratio));
+    --font-size-3: calc(var(--font-size-4) * var(--golden-ratio));
+    --font-size-2: calc(var(--font-size-3) * var(--golden-ratio));
+    --font-size-1: calc(var(--font-size-2) * var(--golden-ratio));
+
+    /* Breakpoints taken from BrowserStack:
+     * https://www.browserstack.com/guide/responsive-design-breakpoints
+     */
+    --width-breakpoint-mobile-xs: 480px;
+    --width-breakpoint-mobile-sm: 600px;
+    --width-breakpoint-tablet-sm: 768px;
+    --width-breakpoint-tablet-lg: 1024px;
+    --width-breakpoint-desktop-sm: 1280px;
+    --width-breakpoint-desktop-lg: 1440px;
+
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: var(--font-size-1);
+}
+
+h2 {
+    font-size: var(--font-size-2);
+}
+
+h3 {
+    font-size: var(--font-size-3);
+}
+
+h4 {
+    font-size: var(--font-size-4);
+}
+
+h5 {
+    font-size: var(--font-size-5);
+}
+
+p {
+    font-size: var(--font-size-base);
+}
+
+section {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.container {
+    padding: 1rem;
+}

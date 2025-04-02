@@ -1,8 +1,8 @@
-import LoginPage from './pages/LoginPage.tsx';
+import AuthPage from './pages/AuthPage.tsx';
 
 function App() {
     return (
-        <LoginPage/>
+        <AuthPage/>
     )
 }
 
