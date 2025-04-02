@@ -55,6 +55,21 @@ services:
         condition: service_started
         restart: true
         required: true
+  client-web:
+    build:
+      context: clients/web
+      dockerfile: Dockerfile
+    volumes:
+      - ./clients/web/:/app
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      gateway:
+        condition: service_started
+        restart: true
+        required: true
   auth-db:
     image: postgres:17-alpine
     volumes:
