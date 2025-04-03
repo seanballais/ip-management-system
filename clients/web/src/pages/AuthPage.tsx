@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {useState} from 'react';
 import {Login} from '../components.tsx';
+import './AuthPage.css';
 
 enum ActiveForm {
     LOGIN,
@@ -11,7 +12,7 @@ function AuthPage(): React.ReactNode {
     const [activeForm, setActiveForm] = useState<ActiveForm>(ActiveForm.LOGIN);
 
     return (
-        <section className='container'>
+        <section className='container full-page centered'>
             {activeForm == ActiveForm.LOGIN ? <Login/> : <h1>What?</h1>}
         </section>
     );

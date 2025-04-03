@@ -116,6 +116,8 @@
     --width-breakpoint-desktop-lg: 1440px;
 
     font-family: 'IBM Plex Mono', monospace;
+
+    --container-padding-size: 1rem;
 }
 
 * {
@@ -152,6 +154,40 @@ section {
     margin: auto;
 }
 
+form {
+    display: flex;
+    flex-direction: column;
+
+    font-size: 1rem;
+
+    input, button {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 1rem;
+        padding: 0.5rem;
+    }
+
+    label {
+        margin-bottom: 0.35rem;
+    }
+
+    div.form-group {
+        display: flex;
+        flex-direction: column;
+
+        margin-bottom: 1rem;
+    }
+}
+
 .container {
-    padding: 1rem;
+    padding: var(--container-padding-size);
+
+    &.full-page {
+        min-height: calc(100vh - (var(--container-padding-size) * 2));
+
+        &.centered {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 }
