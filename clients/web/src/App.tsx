@@ -1,10 +1,18 @@
 import AuthPage from './pages/AuthPage.tsx';
-
+import {ACCESS_TOKEN_STORAGE_NAME} from "./utils/api.ts";
+import MainPage from "./pages/MainPage.tsx";
 
 function App() {
-    return (
-        <AuthPage/>
-    )
+    const accessToken: string | null = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME);
+    // const refreshToken: string | null = localStorage.getItem(REFRESH_TOKEN_STORAGE_NAME);
+
+    if (accessToken) {
+        return <MainPage/>
+    } else {
+        return (
+            <AuthPage/>
+        )
+    }
 }
 
 export default App;
