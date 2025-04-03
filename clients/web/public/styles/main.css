@@ -138,7 +138,7 @@
     --ui-border-colour: var(--dark-colour);
     --ui-shadow-colour: var(--dark-colour);
 
-    --ui-button-hover-colour: hsl(from var(--ui-button-colour) h s calc(l + var(--colour-change-factor)));;
+    --ui-button-hover-colour: hsl(from var(--ui-button-colour) h s calc(l + var(--colour-change-factor)));
 
     --box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
 }

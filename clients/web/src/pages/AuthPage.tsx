@@ -11,7 +11,7 @@ enum ActiveForm {
 function AuthPage(): React.ReactNode {
     const [activeForm, setActiveForm] = useState<ActiveForm>(ActiveForm.LOGIN);
 
-    function switchForm() {
+    function switchForm(): void {
         if (activeForm == ActiveForm.LOGIN) {
             setActiveForm(ActiveForm.REGISTRATION);
         } else {
