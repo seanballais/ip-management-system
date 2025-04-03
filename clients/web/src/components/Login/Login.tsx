@@ -1,6 +1,11 @@
 import * as React from 'react';
 import {useState} from 'react';
-import {APIError, post, User} from "../../utils/api.ts";
+import {
+    ACCESS_TOKEN_STORAGE_NAME,
+    APIError,
+    post, REFRESH_TOKEN_STORAGE_NAME,
+    User
+} from "../../utils/api.ts";
 
 import './Login.css';
 import {FormMessage, FormMessageType} from "../../components.tsx";
@@ -77,26 +82,30 @@ function Login(): React.ReactNode {
         const response: Response = await post('/login', JSON.stringify(bodyData));
         if (response.ok) {
             const {data}: LoginSuccessJSONResponse = await response.json();
-            console.log(data);
+            localStorage.setItem(ACCESS_TOKEN_STORAGE_NAME, data.authorization.access_token);
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_NAME, data.authorization.refresh_token);
+
+            // Reload so that we can change the page displayed easily.
+            window.location.reload();
+            return false;
         } else {
             const {detail}: LoginFailJSONResponse = await response.json();
 
             // We already know that there is one error that is returned.
             if (detail.errors[0].code === 'wrong_credentials') {
-                console.log(detail.errors[0].code);
                 setFormData((data: LoginFormState): LoginFormState => ({
                     ...data,
                     errorMessage: 'Wrong username or password.'
                 }));
             }
-        }
 
-        setFormData((data: LoginFormState): LoginFormState => ({
-            ...data,
-            isUsernameInputEnabled: true,
-            isPasswordInputEnabled: true,
-            isSubmitButtonEnabled: true
-        }));
+            setFormData((data: LoginFormState): LoginFormState => ({
+                ...data,
+                isUsernameInputEnabled: true,
+                isPasswordInputEnabled: true,
+                isSubmitButtonEnabled: true
+            }));
+        }
 
         return false;
     }

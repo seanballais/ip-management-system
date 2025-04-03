@@ -1,4 +1,6 @@
 const API_BASE_URL: string = 'http://localhost:8083';
+const ACCESS_TOKEN_STORAGE_NAME: string = 'accessToken';
+const REFRESH_TOKEN_STORAGE_NAME: string = 'refreshToken';
 
 enum HTTPMethod {
     GET = 'GET',
@@ -32,6 +34,11 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string): Promise
     });
 }
 
-export {HTTPMethod, post};
+export {
+    ACCESS_TOKEN_STORAGE_NAME,
+    REFRESH_TOKEN_STORAGE_NAME,
+    HTTPMethod,
+    post
+};
 export type {User, APIError};
 
