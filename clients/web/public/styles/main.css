@@ -127,6 +127,8 @@
     --background-colour: hsl(36, 64%, 85%);
     --dark-colour: var(--secondary-colour);
     --light-colour: hsl(0, 0%, 90%);
+    --primary-error-colour: hsl(0, 72%, 69%);
+    --secondary-error-colour: hsl(0, 100%, 81%);
 
     --colour-change-factor: 7;
 
@@ -134,13 +136,16 @@
 
     --text-colour: var(--secondary-colour);
 
+    --text-error-colour: var(--primary-error-colour);
+    --background-error-colour: var(--secondary-error-colour);
+
     --ui-button-colour: var(--primary-colour);
     --ui-border-colour: var(--dark-colour);
     --ui-shadow-colour: var(--dark-colour);
 
     --ui-button-hover-colour: hsl(from var(--ui-button-colour) h s calc(l + var(--colour-change-factor)));
 
-    --box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
+    --ui-button-box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
 }
 
 * {
@@ -215,7 +220,7 @@ button {
     background-color: var(--ui-button-colour);
 
     border: solid var(--ui-border-size) var(--ui-border-colour);
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--ui-button-box-shadow);
 
     font-weight: 600;
 

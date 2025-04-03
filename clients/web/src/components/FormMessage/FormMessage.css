@@ -1,0 +1,9 @@
+figure.form-message {
+    background-color: var(--background-error-colour);
+    color: var(--text-error-colour);
+
+    border: solid var(--ui-border-size) var(--primary-error-colour);
+
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
