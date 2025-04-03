@@ -11,7 +11,9 @@ enum ActiveForm {
 function AuthPage(): React.ReactNode {
     const [activeForm, setActiveForm] = useState<ActiveForm>(ActiveForm.LOGIN);
 
-    function switchForm(): void {
+    function switchForm(event: React.MouseEvent<HTMLElement>): void {
+        event.preventDefault();
+
         if (activeForm == ActiveForm.LOGIN) {
             setActiveForm(ActiveForm.REGISTRATION);
         } else {
@@ -23,11 +25,10 @@ function AuthPage(): React.ReactNode {
         <section className='container full-page centered'>
             {activeForm == ActiveForm.LOGIN ? <Login/> : <Registration/>}
             {activeForm == ActiveForm.LOGIN
-                ? <p>No account? <a href='javascript:void(0)'
-                                    onClick={switchForm}>Create an account.</a>
+                ? <p>No account? <a href='#' onClick={switchForm}>Create an
+                    account.</a>
                 </p>
-                : <p>Already have an account? <a href='javascript:void(0)'
-                                                 onClick={switchForm}>Log
+                : <p>Already have an account? <a href='#' onClick={switchForm}>Log
                     in.</a></p>
             }
         </section>
