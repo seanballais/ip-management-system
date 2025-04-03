@@ -219,6 +219,9 @@ button {
 }
 
 .container {
+    display: flex;
+    flex-direction: column;
+
     padding: var(--container-padding-size);
 
     &.full-page {
