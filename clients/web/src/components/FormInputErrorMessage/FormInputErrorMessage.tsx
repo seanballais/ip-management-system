@@ -14,7 +14,10 @@ function FormInputErrorMessage({
         return null;
     }
 
-    return <label htmlFor={targetInput}>{message}</label>;
+    return (
+        <label className='form-input-error-message'
+               htmlFor={targetInput}>{message}</label>
+    );
 }
 
 export {FormInputErrorMessage};

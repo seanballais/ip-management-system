@@ -2,8 +2,7 @@ import * as React from 'react';
 import {useState} from "react";
 import {
     ACCESS_TOKEN_STORAGE_NAME, APIError,
-    post,
-    REFRESH_TOKEN_STORAGE_NAME, User
+    put, REFRESH_TOKEN_STORAGE_NAME, User
 } from "../../utils/api.ts";
 import {
     FormInputErrorMessage
@@ -78,7 +77,7 @@ function Registration(): React.ReactNode {
             isSubmitButtonEnabled: false
         }));
 
-        const response: Response = await post('/register', JSON.stringify(bodyData));
+        const response: Response = await put('/register', JSON.stringify(bodyData));
         if (response.ok) {
             const {data}: RegistrationSuccessJSONResponse = await response.json();
             localStorage.setItem(ACCESS_TOKEN_STORAGE_NAME, data.authorization.access_token);
@@ -99,7 +98,7 @@ function Registration(): React.ReactNode {
             } else if (detail.errors[0].code === 'mismatched_passwords') {
                 setFormData((data: RegistrationFormState): RegistrationFormState => ({
                     ...data,
-                    usernameInputErrorMessage: 'The passwords do not match.'
+                    passwordInputErrorMessage: 'The passwords do not match.'
                 }));
             }
 

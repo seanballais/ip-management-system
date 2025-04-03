@@ -99,7 +99,7 @@
 :root {
     --golden-ratio: 1.618;
     --font-size-base: 1rem; /* Usually defaults to 16px. */
-    --font-size-6: calc(var(--font-size-base) / var(--golden-ratio));
+    --font-size-6: calc(var(--font-size-base) * 0.75);
     --font-size-5: calc(var(--font-size-base) * var(--golden-ratio));
     --font-size-4: calc(var(--font-size-5) * var(--golden-ratio));
     --font-size-3: calc(var(--font-size-4) * var(--golden-ratio));

@@ -1,0 +1,8 @@
+label.form-input-error-message {
+    color: var(--text-error-colour);
+
+    font-size: var(--font-size-6);
+
+    margin-top: 0.35rem;
+    margin-bottom: 0;
+}

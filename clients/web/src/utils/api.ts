@@ -24,6 +24,10 @@ async function post(path: string, body: string): Promise<Response> {
     return fetchAPI(path, HTTPMethod.POST, body);
 }
 
+async function put(path: string, body: string): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.PUT, body);
+}
+
 async function fetchAPI(path: string, method: HTTPMethod, body: string): Promise<Response> {
     return fetch(`${API_BASE_URL}${path}`, {
         method: method,
@@ -38,7 +42,8 @@ export {
     ACCESS_TOKEN_STORAGE_NAME,
     REFRESH_TOKEN_STORAGE_NAME,
     HTTPMethod,
-    post
+    post,
+    put
 };
 export type {User, APIError};
 
