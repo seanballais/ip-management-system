@@ -99,6 +99,7 @@
 :root {
     --golden-ratio: 1.618;
     --font-size-base: 1rem; /* Usually defaults to 16px. */
+    --font-size-6: calc(var(--font-size-base) / var(--golden-ratio));
     --font-size-5: calc(var(--font-size-base) * var(--golden-ratio));
     --font-size-4: calc(var(--font-size-5) * var(--golden-ratio));
     --font-size-3: calc(var(--font-size-4) * var(--golden-ratio));
@@ -120,19 +121,25 @@
     --container-padding-size: 1rem;
     --ui-border-size: 1px;
 
-    --primary-colour: #92BA92;
-    --secondary-colour: #525E75;
-    --accent-colour: #78938A;
-    --background-colour: #F1DDBF;
+    --primary-colour: hsl(120, 22%, 65%);
+    --secondary-colour: hsl(219, 18%, 39%);
+    --accent-colour: hsl(160, 11%, 52%);
+    --background-colour: hsl(36, 64%, 85%);
     --dark-colour: var(--secondary-colour);
-    --light-colour: #E6E6E6;
+    --light-colour: hsl(0, 0%, 90%);
+
+    --colour-change-factor: 7;
 
     --ui-z-axis-offset: 5px;
 
     --text-colour: var(--secondary-colour);
+
     --ui-button-colour: var(--primary-colour);
     --ui-border-colour: var(--dark-colour);
     --ui-shadow-colour: var(--dark-colour);
+
+    --ui-button-hover-colour: hsl(from var(--ui-button-colour) h s calc(l + var(--colour-change-factor)));;
+
     --box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
 }
 
@@ -205,6 +212,8 @@ input {
 }
 
 button {
+    background-color: var(--ui-button-colour);
+
     border: solid var(--ui-border-size) var(--ui-border-colour);
     box-shadow: var(--box-shadow);
 
@@ -215,6 +224,10 @@ button {
     &:active {
         box-shadow: none;
         transform: translateY(var(--ui-z-axis-offset));
+    }
+
+    &:hover {
+        background-color: var(--ui-button-hover-colour);
     }
 }
 
