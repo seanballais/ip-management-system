@@ -118,6 +118,15 @@
     font-family: 'IBM Plex Mono', monospace;
 
     --container-padding-size: 1rem;
+    --ui-border-size: 1px;
+
+    --dark-colour: #333333;
+
+    --ui-z-axis-offset: 5px;
+
+    --ui-border-colour: var(--dark-colour);
+    --ui-shadow-colour: var(--dark-colour);
+    --box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
 }
 
 * {
@@ -160,21 +169,37 @@ form {
 
     font-size: 1rem;
 
-    label {
-        margin-bottom: 0.35rem;
-    }
-
-    input, button {
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 1rem;
-        padding: 0.5rem;
-    }
-
     div.form-group {
         display: flex;
         flex-direction: column;
 
         margin-bottom: 1rem;
+    }
+}
+
+label {
+    margin-bottom: 0.35rem;
+}
+
+input, button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    padding: 0.5rem;
+}
+
+input {
+    border: solid var(--ui-border-size) var(--ui-border-colour);
+}
+
+button {
+    border: solid var(--ui-border-size) var(--ui-border-colour);
+    box-shadow: var(--box-shadow);
+
+    cursor: pointer;
+
+    &:active {
+        box-shadow: none;
+        transform: translateY(var(--ui-z-axis-offset));
     }
 }
 
