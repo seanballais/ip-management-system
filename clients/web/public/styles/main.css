@@ -160,14 +160,14 @@ form {
 
     font-size: 1rem;
 
+    label {
+        margin-bottom: 0.35rem;
+    }
+
     input, button {
         font-family: 'IBM Plex Mono', monospace;
         font-size: 1rem;
         padding: 0.5rem;
-    }
-
-    label {
-        margin-bottom: 0.35rem;
     }
 
     div.form-group {
