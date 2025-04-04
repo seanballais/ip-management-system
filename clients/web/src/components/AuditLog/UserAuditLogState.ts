@@ -1,4 +1,4 @@
-import {UserEvent} from "../utils/api.ts";
+import {UserEvent} from "../../utils/api.ts";
 
 interface UserAuditLogState {
     numTotalItems?: number;

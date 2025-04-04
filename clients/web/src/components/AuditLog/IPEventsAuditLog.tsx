@@ -1,31 +1,29 @@
 import * as React from 'react';
 import {useState} from "react";
+import {IPEventsPanelProps} from "./props.ts";
 import {
-    FailedJSONResponse,
-    fetchUserAuditLogData,
-    MAX_NUM_ITEMS_PER_PAGE, UserAuditLog, UserAuditLogJSONResponse,
-    UserEvent
+    FailedJSONResponse, fetchIPAuditLogData, IPAuditLog,
+    IPAuditLogJSONResponse, IPEvent,
+    MAX_NUM_ITEMS_PER_PAGE,
 } from "../../utils/api.ts";
-import {UserAuditLogState} from "../../interfaces.ts";
 import {clearTokens} from "../../utils/tokens.ts";
 import {capitalizeString} from "../../utils/strings.ts";
-import {UserEventsPanelProps} from "./props.ts";
+import IPAuditLogState from "./IPAuditLogState.ts";
 
 interface LogState {
     isLoadingData: boolean;
     areButtonsEnabled: boolean
 }
 
-interface UserAuditLogRowsState {
+interface IPAuditLogRowsState {
     parentState: LogState;
-    dataState: UserAuditLogState;
+    dataState: IPAuditLogState;
 }
 
-function UserEventsAuditLog({
-                                userAuditLogState,
-                                setUserAuditLogState
-                            }: UserEventsPanelProps): React.ReactNode {
-    const numPages: number = Math.ceil((userAuditLogState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
+function IPEventsAuditLog({
+                              ipAuditLogState, setIPAuditLogState
+                          }: IPEventsPanelProps): React.ReactNode {
+    const numPages: number = Math.ceil((ipAuditLogState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
     let [state, setState] = useState<LogState>({
         isLoadingData: false,
         areButtonsEnabled: true
@@ -36,7 +34,7 @@ function UserEventsAuditLog({
             return;
         }
 
-        getPage(userAuditLogState.pageNumber - 1);
+        getPage(ipAuditLogState.pageNumber - 1);
     }
 
     function handleNextButtonClick(): void {
@@ -44,15 +42,15 @@ function UserEventsAuditLog({
             return;
         }
 
-        getPage(userAuditLogState.pageNumber + 1);
+        getPage(ipAuditLogState.pageNumber + 1);
     }
 
     function isFirstPage(): boolean {
-        return userAuditLogState.pageNumber == 0;
+        return ipAuditLogState.pageNumber == 0;
     }
 
     function isLastPage(): boolean {
-        return userAuditLogState.pageNumber + 1 >= numPages;
+        return ipAuditLogState.pageNumber + 1 >= numPages;
     }
 
     function getPage(pageNumber: number) {
@@ -63,13 +61,13 @@ function UserEventsAuditLog({
         }));
 
         // Empty the events.
-        setUserAuditLogState((state: UserAuditLogState): UserAuditLogState => ({
+        setIPAuditLogState((state: IPAuditLogState): IPAuditLogState => ({
             ...state,
             events: []
         }));
 
-        fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, pageNumber)
-            .then(async (response: Response): Promise<UserAuditLogJSONResponse> => {
+        fetchIPAuditLogData(MAX_NUM_ITEMS_PER_PAGE, pageNumber)
+            .then(async (response: Response): Promise<IPAuditLogJSONResponse> => {
                 if (response.ok) {
                     return await response.json();
                 }
@@ -78,9 +76,9 @@ function UserEventsAuditLog({
                 const errorCode: string = detail.errors[0].code;
                 throw new Error(`Error code: ${errorCode}`);
             })
-            .then((responseData: UserAuditLogJSONResponse): void => {
-                const data: UserAuditLog = responseData.data;
-                setUserAuditLogState((state: UserAuditLogState): UserAuditLogState => ({
+            .then((responseData: IPAuditLogJSONResponse): void => {
+                const data: IPAuditLog = responseData.data;
+                setIPAuditLogState((state: IPAuditLogState): IPAuditLogState => ({
                     ...state,
                     numTotalItems: data.num_total_items,
                     numItemsInPage: data.count,
@@ -102,10 +100,10 @@ function UserEventsAuditLog({
             });
     }
 
-    function UserAuditLogRows({
-                                  parentState,
-                                  dataState
-                              }: UserAuditLogRowsState): React.ReactNode {
+    function IPAuditLogRows({
+                                parentState,
+                                dataState
+                            }: IPAuditLogRowsState): React.ReactNode {
         if (dataState.events.length === 0) {
             if (parentState.isLoadingData) {
                 return (
@@ -123,19 +121,19 @@ function UserEventsAuditLog({
         }
 
         return (
-            dataState.events.map((event: UserEvent): React.ReactNode => (
+            dataState.events.map((event: IPEvent): React.ReactNode => (
                 <tr key={event.id}>
                     <td>{event.recorded_on}</td>
                     <td>{capitalizeString(event.type)}</td>
-                    <th scope='row'>@{event.user.username}</th>
+                    <th scope='row'>@{event.trigger_user.username}</th>
                 </tr>
             ))
         )
     }
 
     return (
-        <div className='panel-audit-log'>
-            <h1>User Events</h1>
+        <div className='panel-audit-log margin-top-32px max-width-initial'>
+            <h1>IP Address Events</h1>
             <table>
                 <thead>
                 <tr>
@@ -145,8 +143,8 @@ function UserEventsAuditLog({
                 </tr>
                 </thead>
                 <tbody>
-                <UserAuditLogRows parentState={state}
-                                  dataState={userAuditLogState}/>
+                <IPAuditLogRows parentState={state}
+                                dataState={ipAuditLogState}/>
                 </tbody>
             </table>
             <div className='row pagination-row'>
@@ -156,7 +154,7 @@ function UserEventsAuditLog({
                     onClick={handlePreviousButtonClick}>&larr; Previous
                 </button>
                 <div
-                    className='page-number'>{userAuditLogState.pageNumber + 1}/{numPages}</div>
+                    className='page-number'>{ipAuditLogState.pageNumber + 1}/{numPages}</div>
                 <button
                     className={isLastPage() ? 'next-button invisible' : 'next-button'}
                     disabled={!state.areButtonsEnabled}
@@ -166,4 +164,4 @@ function UserEventsAuditLog({
     );
 }
 
-export default UserEventsAuditLog;
+export default IPEventsAuditLog;

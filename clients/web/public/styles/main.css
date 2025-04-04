@@ -301,6 +301,14 @@ table, th, td {
     margin: auto;
 }
 
+.margin-top-32px {
+    margin-top: 32px !important;
+}
+
+.max-width-initial {
+    max-width: initial !important;
+}
+
 .invisible {
     visibility: hidden;
 }

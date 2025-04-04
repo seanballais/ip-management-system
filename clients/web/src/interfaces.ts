@@ -1,3 +1,3 @@
-import UserAuditLogState from "./interfaces/UserAuditLogState.ts";
+import UserAuditLogState from "./components/AuditLog/UserAuditLogState.ts";
 
 export type {UserAuditLogState};

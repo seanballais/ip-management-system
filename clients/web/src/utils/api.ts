@@ -28,11 +28,30 @@ interface User {
     is_superuser: boolean
 }
 
+interface IP {
+    id: number;
+    ip_address: string;
+    created_on: number;
+    label: string;
+    comment: string;
+    recorder: User;
+}
+
 interface UserEvent {
-    id: number,
-    recorded_on: number,
-    type: string,
-    user: User
+    id: number;
+    recorded_on: number;
+    type: string;
+    user: User;
+}
+
+interface IPEvent {
+    id: number;
+    recorded_on: number;
+    type: string;
+    ip: IP;
+    trigger_user: User;
+    old_data: { [key: string]: any };
+    new_data: { [key: string]: any };
 }
 
 interface UserAuditLog {
@@ -42,8 +61,19 @@ interface UserAuditLog {
     events: Array<UserEvent>
 }
 
+interface IPAuditLog {
+    count: number;
+    num_total_items: number;
+    page_number: number;
+    events: Array<IPEvent>;
+}
+
 interface UserAuditLogJSONResponse {
     data: UserAuditLog
+}
+
+interface IPAuditLogJSONResponse {
+    data: IPAuditLog;
 }
 
 interface APIError {
@@ -70,6 +100,18 @@ async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number
     };
     try {
         return await postWithTokenRefresh('/audit-log/users', {}, queryParams);
+    } catch (e: unknown) {
+        throw e as Error;
+    }
+}
+
+async function fetchIPAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
+    const queryParams: QueryParameters = {
+        items_per_page: numItemsPerPage,
+        page_number: pageNumber
+    };
+    try {
+        return await postWithTokenRefresh('/audit-log/ips', {}, queryParams);
     } catch (e: unknown) {
         throw e as Error;
     }
@@ -155,6 +197,7 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string, queryPar
 export {
     HTTPMethod,
     MAX_NUM_ITEMS_PER_PAGE,
+    fetchIPAuditLogData,
     fetchUserAuditLogData,
     postWithTokenRefresh,
     post,
@@ -164,6 +207,10 @@ export type {
     APIError,
     FailedJSONResponse,
     GenericBodyData,
+    IP,
+    IPAuditLog,
+    IPAuditLogJSONResponse,
+    IPEvent,
     QueryParameters,
     User,
     UserAuditLog,

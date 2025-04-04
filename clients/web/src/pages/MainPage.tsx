@@ -2,8 +2,8 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import LogoutLink from "../components/LogoutLink/LogoutLink.tsx";
 import {
-    FailedJSONResponse,
-    fetchUserAuditLogData,
+    FailedJSONResponse, fetchIPAuditLogData,
+    fetchUserAuditLogData, IPAuditLog, IPAuditLogJSONResponse,
     MAX_NUM_ITEMS_PER_PAGE,
     User,
     UserAuditLog,
@@ -15,9 +15,14 @@ import {
 } from "../utils/tokens.ts";
 import AuditLogPanel from "../components/AuditLog/AuditLogPanel.tsx";
 import {UserAuditLogState} from "../interfaces.ts";
+import IPAuditLogState from "../components/AuditLog/IPAuditLogState.ts";
 
 function MainPage(): React.ReactNode {
     const [userAuditLogState, setUserAuditLogState] = useState<UserAuditLogState>({
+        pageNumber: 0,
+        events: []
+    });
+    const [ipAuditLogState, setIPAuditLogState] = useState<IPAuditLogState>({
         pageNumber: 0,
         events: []
     });
@@ -52,6 +57,32 @@ function MainPage(): React.ReactNode {
                 clearTokens();
                 window.location.reload();
             });
+        fetchIPAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
+            .then(async (response: Response): Promise<IPAuditLogJSONResponse> => {
+                if (response.ok) {
+                    return await response.json();
+                }
+
+                const {detail}: FailedJSONResponse = await response.json();
+                const errorCode: string = detail.errors[0].code;
+                throw new Error(`Error code: ${errorCode}`);
+            })
+            .then((responseData: IPAuditLogJSONResponse): void => {
+                const data: IPAuditLog = responseData.data;
+                setIPAuditLogState((state: IPAuditLogState): IPAuditLogState => ({
+                    ...state,
+                    numTotalItems: data.num_total_items,
+                    numItemsInPage: data.count,
+                    pageNumber: data.page_number,
+                    events: data.events
+                }));
+            })
+            .catch((): void => {
+                // Tokens are already invalid, so we need to remove the tokens
+                // in storage. We reload so that we are back in the login page.
+                clearTokens();
+                window.location.reload();
+            });
     }, []);
 
     return (
@@ -68,7 +99,10 @@ function MainPage(): React.ReactNode {
             </header>
             <section className='container'>
                 <AuditLogPanel userAuditLogState={userAuditLogState}
-                               setUserAuditLogState={setUserAuditLogState}/>
+                               ipAuditLogState={ipAuditLogState}
+                               setUserAuditLogState={setUserAuditLogState}
+                               setIPAuditLogState={setIPAuditLogState}
+                />
             </section>
         </>
     );
