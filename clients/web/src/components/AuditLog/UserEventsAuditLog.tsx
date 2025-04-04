@@ -1,33 +1,137 @@
 import * as React from 'react';
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import AuditLogPanelProps from "./AuditLogPanelProps.ts";
-import {MAX_NUM_ITEMS_PER_PAGE, UserEvent} from "../../utils/api.ts";
+import {
+    FailedJSONResponse,
+    fetchUserAuditLogData,
+    MAX_NUM_ITEMS_PER_PAGE, UserAuditLog, UserAuditLogJSONResponse,
+    UserEvent
+} from "../../utils/api.ts";
+import {UserAuditLogState} from "../../interfaces.ts";
+import {clearTokens} from "../../utils/tokens.ts";
+import {capitalizeString} from "../../utils/strings.ts";
 
 interface LogState {
-    pageNumber?: number;
-    numPages?: number;
+    isLoadingData: boolean;
+    areButtonsEnabled: boolean
+}
+
+interface UserAuditLogRowsState {
+    parentState: LogState;
+    dataState: UserAuditLogState;
 }
 
 function UserEventsAuditLog({
                                 userAuditLogState,
                                 setUserAuditLogState
                             }: AuditLogPanelProps): React.ReactNode {
-    let [state, setState] = useState<LogState>({});
+    const numPages: number = Math.ceil((userAuditLogState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
+    let [state, setState] = useState<LogState>({
+        isLoadingData: false,
+        areButtonsEnabled: true
+    });
 
-    useEffect((): void => {
-        if (userAuditLogState.numTotalItems) {
-            const numPages: number = Math.ceil(userAuditLogState.numTotalItems / MAX_NUM_ITEMS_PER_PAGE);
-            setState((state: LogState): LogState => ({
-                ...state,
-                numPages: numPages
-            }));
+    function handlePreviousButtonClick(): void {
+        if (isFirstPage()) {
+            return;
         }
 
+        getPage(userAuditLogState.pageNumber - 1);
+    }
+
+    function handleNextButtonClick(): void {
+        if (isLastPage()) {
+            return;
+        }
+
+        getPage(userAuditLogState.pageNumber + 1);
+    }
+
+    function isFirstPage(): boolean {
+        return userAuditLogState.pageNumber == 0;
+    }
+
+    function isLastPage(): boolean {
+        return userAuditLogState.pageNumber + 1 >= numPages;
+    }
+
+    function getPage(pageNumber: number) {
         setState((state: LogState): LogState => ({
             ...state,
-            pageNumber: userAuditLogState.pageNumber + 1
+            isLoadingData: true,
+            areButtonsEnabled: false
         }));
-    }, [userAuditLogState]);
+
+        // Empty the events.
+        setUserAuditLogState((state: UserAuditLogState): UserAuditLogState => ({
+            ...state,
+            events: []
+        }));
+
+        fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, pageNumber)
+            .then(async (response: Response): Promise<UserAuditLogJSONResponse> => {
+                if (response.ok) {
+                    return await response.json();
+                }
+
+                const {detail}: FailedJSONResponse = await response.json();
+                const errorCode: string = detail.errors[0].code;
+                throw new Error(`Error code: ${errorCode}`);
+            })
+            .then((responseData: UserAuditLogJSONResponse): void => {
+                const data: UserAuditLog = responseData.data;
+                setUserAuditLogState((state: UserAuditLogState): UserAuditLogState => ({
+                    ...state,
+                    numTotalItems: data.num_total_items,
+                    numItemsInPage: data.count,
+                    pageNumber: data.page_number,
+                    events: data.events
+                }));
+
+                setState((state: LogState): LogState => ({
+                    ...state,
+                    isLoadingData: false,
+                    areButtonsEnabled: true
+                }));
+            })
+            .catch((): void => {
+                // Tokens are already invalid, so we need to remove the tokens
+                // in storage. We reload so that we are back in the login page.
+                clearTokens();
+                window.location.reload();
+            });
+    }
+
+    function UserAuditLogRows({
+                                  parentState,
+                                  dataState
+                              }: UserAuditLogRowsState): React.ReactNode {
+        if (dataState.events.length === 0) {
+            if (parentState.isLoadingData) {
+                return (
+                    <tr className='text-align-center'>
+                        <td colSpan={3}>Loading data...</td>
+                    </tr>
+                );
+            } else {
+                return (
+                    <tr className='text-align-center'>
+                        <td colSpan={3}>No user event logged.</td>
+                    </tr>
+                );
+            }
+        }
+
+        return (
+            dataState.events.map((event: UserEvent): React.ReactNode => (
+                <tr key={event.id}>
+                    <td>{event.recorded_on}</td>
+                    <td>{capitalizeString(event.type)}</td>
+                    <th scope='row'>@{event.user.username}</th>
+                </tr>
+            ))
+        )
+    }
 
     return (
         <div className='panel-audit-log'>
@@ -41,22 +145,22 @@ function UserEventsAuditLog({
                 </tr>
                 </thead>
                 <tbody>
-                {
-                    userAuditLogState.events.map((event: UserEvent): React.ReactNode => (
-                        <tr key={event.id}>
-                            <td>{event.recorded_on}</td>
-                            <td>{event.type}</td>
-                            <th scope='row'>@{event.user.username}</th>
-                        </tr>
-                    ))
-                }
+                <UserAuditLogRows parentState={state}
+                                  dataState={userAuditLogState}/>
                 </tbody>
             </table>
             <div className='row pagination-row'>
-                <button className='prev-button'>&larr; Previous</button>
+                <button
+                    className={isFirstPage() ? 'previous-button invisible' : 'previous-button'}
+                    disabled={!state.areButtonsEnabled}
+                    onClick={handlePreviousButtonClick}>&larr; Previous
+                </button>
                 <div
-                    className='page-number'>{state.pageNumber}/{state.numPages}</div>
-                <button className='next-button'>Next &rarr;</button>
+                    className='page-number'>{userAuditLogState.pageNumber + 1}/{numPages}</div>
+                <button
+                    className={isLastPage() ? 'next-button invisible' : 'next-button'}
+                    disabled={!state.areButtonsEnabled}
+                    onClick={handleNextButtonClick}>Next &rarr;</button>
             </div>
         </div>
     );

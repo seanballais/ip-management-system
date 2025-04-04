@@ -2,10 +2,11 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import LogoutLink from "../components/LogoutLink/LogoutLink.tsx";
 import {
-    FailedJSONResponse, GenericBodyData, MAX_NUM_ITEMS_PER_PAGE,
-    postWithTokenRefresh,
-    QueryParameters,
-    User, UserAuditLog,
+    FailedJSONResponse,
+    fetchUserAuditLogData,
+    MAX_NUM_ITEMS_PER_PAGE,
+    User,
+    UserAuditLog,
     UserAuditLogJSONResponse
 } from "../utils/api.ts";
 import {
@@ -52,21 +53,6 @@ function MainPage(): React.ReactNode {
                 window.location.reload();
             });
     }, []);
-
-    async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
-        const bodyData: GenericBodyData = {
-            access_token: accessToken
-        };
-        const queryParams: QueryParameters = {
-            items_per_page: numItemsPerPage,
-            page_number: pageNumber
-        };
-        try {
-            return await postWithTokenRefresh('/audit-log/users', bodyData, queryParams);
-        } catch (e: unknown) {
-            throw e as Error;
-        }
-    }
 
     return (
         <>

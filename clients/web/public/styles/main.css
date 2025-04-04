@@ -300,3 +300,7 @@ table, th, td {
 .margin-center {
     margin: auto;
 }
+
+.invisible {
+    visibility: hidden;
+}

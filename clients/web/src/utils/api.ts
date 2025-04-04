@@ -63,6 +63,18 @@ interface TokenRefreshSuccessJSONResponse {
     };
 }
 
+async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
+    const queryParams: QueryParameters = {
+        items_per_page: numItemsPerPage,
+        page_number: pageNumber
+    };
+    try {
+        return await postWithTokenRefresh('/audit-log/users', {}, queryParams);
+    } catch (e: unknown) {
+        throw e as Error;
+    }
+}
+
 async function postWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     const response: Response = await postWithAccessToken(path, body, queryParams);
     if (response.ok) {
@@ -143,6 +155,7 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string, queryPar
 export {
     HTTPMethod,
     MAX_NUM_ITEMS_PER_PAGE,
+    fetchUserAuditLogData,
     postWithTokenRefresh,
     post,
     put
