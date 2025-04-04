@@ -45,7 +45,7 @@ docker_var_name = "postgres_password"
 value = "892748d74a477dd1323853564b71e361789ada19b9506745af5f701536640b3f"
 
 [access_token_minutes_ttl]
-value = 15
+value = 1
 
 [refresh_token_minutes_ttl]
 value = 60
