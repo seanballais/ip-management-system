@@ -5,6 +5,9 @@ enum TokenType {
     REFRESH_TOKEN = 'refresh_token'
 }
 
+const ACCESS_TOKEN_STORAGE_NAME: string = 'accessToken';
+const REFRESH_TOKEN_STORAGE_NAME: string = 'refreshToken';
+
 interface TokenPayload {
     data: UserData;
     exp: number;
@@ -19,4 +22,14 @@ function getUserDataFromToken(token: string): UserData {
     return payload.data;
 }
 
-export {getUserDataFromToken};
+function clearTokens(): void {
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_NAME);
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_NAME);
+}
+
+export {
+    ACCESS_TOKEN_STORAGE_NAME,
+    REFRESH_TOKEN_STORAGE_NAME,
+    clearTokens,
+    getUserDataFromToken
+};

@@ -1,9 +1,13 @@
 import * as React from 'react';
 import {useState} from "react";
 import {
-    ACCESS_TOKEN_STORAGE_NAME, APIError,
-    put, REFRESH_TOKEN_STORAGE_NAME, User
+    APIError,
+    put, User
 } from "../../utils/api.ts";
+import {
+    ACCESS_TOKEN_STORAGE_NAME,
+    REFRESH_TOKEN_STORAGE_NAME
+} from "../../utils/tokens.ts";
 import {
     FormInputErrorMessage
 } from "../FormInputErrorMessage/FormInputErrorMessage.tsx";

@@ -1,14 +1,17 @@
 import * as React from 'react';
 import {useState} from 'react';
 import {
-    ACCESS_TOKEN_STORAGE_NAME,
     APIError,
-    post, REFRESH_TOKEN_STORAGE_NAME,
+    post,
     User
 } from "../../utils/api.ts";
+import {FormMessage, FormMessageType} from "../../components.tsx";
+import {
+    ACCESS_TOKEN_STORAGE_NAME,
+    REFRESH_TOKEN_STORAGE_NAME
+} from "../../utils/tokens.ts";
 
 import './Login.css';
-import {FormMessage, FormMessageType} from "../../components.tsx";
 
 interface LoginFormState {
     username: string;

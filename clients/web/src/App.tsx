@@ -1,5 +1,5 @@
 import AuthPage from './pages/AuthPage.tsx';
-import {ACCESS_TOKEN_STORAGE_NAME} from "./utils/api.ts";
+import {ACCESS_TOKEN_STORAGE_NAME} from "./utils/tokens.ts";
 import MainPage from "./pages/MainPage.tsx";
 
 function App() {

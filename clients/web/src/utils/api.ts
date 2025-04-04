@@ -1,6 +1,9 @@
+import {
+    ACCESS_TOKEN_STORAGE_NAME,
+    REFRESH_TOKEN_STORAGE_NAME
+} from "./tokens.ts";
+
 const API_BASE_URL: string = 'http://localhost:8083';
-const ACCESS_TOKEN_STORAGE_NAME: string = 'accessToken';
-const REFRESH_TOKEN_STORAGE_NAME: string = 'refreshToken';
 
 enum HTTPMethod {
     GET = 'GET',
@@ -10,10 +13,32 @@ enum HTTPMethod {
     DELETE = 'DELETE'
 }
 
+interface QueryParameters {
+    [key: string]: any;
+}
+
 interface User {
     id: number;
     username: string;
     is_superuser: boolean
+}
+
+interface UserEvent {
+    id: number,
+    recorded_on: number,
+    type: string,
+    user: User
+}
+
+interface UserAuditLog {
+    count: number;
+    num_total_items: number;
+    page_number: number;
+    events: Array<UserEvent>
+}
+
+interface UserAuditLogJSONResponse {
+    data: UserAuditLog
 }
 
 interface APIError {
@@ -37,8 +62,8 @@ interface TokenRefreshSuccessJSONResponse {
     };
 }
 
-async function getWithTokenRefresh(path: string, body: string): Promise<Response> {
-    const response: Response = await get(path, body);
+async function postWithTokenRefresh(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
+    const response: Response = await post(path, body, queryParams);
     if (response.ok) {
         return response;
     }
@@ -51,6 +76,7 @@ async function getWithTokenRefresh(path: string, body: string): Promise<Response
         try {
             await refreshTokens();
         } catch (error: unknown) {
+            // The tokens are likely to no longer be valid.
             throw error as Error;
         }
     } else {
@@ -59,7 +85,7 @@ async function getWithTokenRefresh(path: string, body: string): Promise<Response
     }
 
     // Retry the original operation.
-    return get(path, body);
+    return post(path, body, queryParams);
 }
 
 async function refreshTokens(): Promise<void> {
@@ -68,7 +94,7 @@ async function refreshTokens(): Promise<void> {
     const bodyData: TokenRefreshBodyData = {
         refresh_token: refreshToken
     };
-    const response: Response = await get('token/refresh', JSON.stringify(bodyData));
+    const response: Response = await post('/token/refresh', JSON.stringify(bodyData));
     if (response.ok) {
         const {data}: TokenRefreshSuccessJSONResponse = await response.json();
         localStorage.setItem(ACCESS_TOKEN_STORAGE_NAME, data.access_token);
@@ -80,20 +106,22 @@ async function refreshTokens(): Promise<void> {
     }
 }
 
-async function get(path: string, body: string): Promise<Response> {
-    return fetchAPI(path, HTTPMethod.GET, body);
+async function post(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.POST, body, queryParams);
 }
 
-async function post(path: string, body: string): Promise<Response> {
-    return fetchAPI(path, HTTPMethod.POST, body);
+async function put(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.PUT, body, queryParams);
 }
 
-async function put(path: string, body: string): Promise<Response> {
-    return fetchAPI(path, HTTPMethod.PUT, body);
-}
+async function fetchAPI(path: string, method: HTTPMethod, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
+    let url: string = `${API_BASE_URL}${path}`;
+    if (queryParams !== null) {
+        const params: URLSearchParams = new URLSearchParams(queryParams);
+        url += `?${params.toString()}`;
+    }
 
-async function fetchAPI(path: string, method: HTTPMethod, body: string): Promise<Response> {
-    return fetch(`${API_BASE_URL}${path}`, {
+    return fetch(url, {
         method: method,
         headers: {
             'content-type': 'application/json;charset=UTF-8'
@@ -103,12 +131,17 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string): Promise
 }
 
 export {
-    ACCESS_TOKEN_STORAGE_NAME,
-    REFRESH_TOKEN_STORAGE_NAME,
     HTTPMethod,
-    getWithTokenRefresh,
+    postWithTokenRefresh,
     post,
     put
 };
-export type {User, APIError};
+export type {
+    APIError,
+    QueryParameters,
+    User,
+    UserAuditLog,
+    UserAuditLogJSONResponse,
+    UserEvent
+};
 

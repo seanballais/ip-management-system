@@ -1,8 +1,9 @@
 import * as React from 'react';
+import {post} from "../../utils/api.ts";
 import {
-    ACCESS_TOKEN_STORAGE_NAME, post,
+    ACCESS_TOKEN_STORAGE_NAME, clearTokens,
     REFRESH_TOKEN_STORAGE_NAME
-} from "../../utils/api.ts";
+} from "../../utils/tokens.ts";
 
 interface LogoutBodyData {
     access_token: string;
@@ -25,8 +26,7 @@ function LogoutLink(): React.ReactNode {
         // API call fails, we can still log out the user.
         await post('/logout', JSON.stringify(bodyData));
 
-        localStorage.removeItem(ACCESS_TOKEN_STORAGE_NAME);
-        localStorage.removeItem(REFRESH_TOKEN_STORAGE_NAME);
+        clearTokens();
 
         // This should let us go back to the initial state.
         window.location.reload();
