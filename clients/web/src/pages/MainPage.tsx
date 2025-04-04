@@ -48,7 +48,7 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((): void => {
+            .catch((e: unknown): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
