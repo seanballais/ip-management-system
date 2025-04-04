@@ -183,11 +183,6 @@ p {
     font-size: var(--font-size-base);
 }
 
-section {
-    max-width: 1200px;
-    margin: auto;
-}
-
 form {
     display: flex;
     flex-direction: column;
@@ -240,6 +235,9 @@ button {
     display: flex;
     flex-direction: column;
 
+    max-width: 1200px;
+
+    margin: auto;
     padding: var(--container-padding-size);
 
     &.full-page {
@@ -251,4 +249,26 @@ button {
             justify-content: center;
         }
     }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+
+        width: 100%;
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+
+        width: 100%;
+    }
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.align-right {
+    align-items: end;
 }

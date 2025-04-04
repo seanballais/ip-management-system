@@ -32,7 +32,7 @@ function LogoutLink(): React.ReactNode {
         window.location.reload();
     }
 
-    return <a href='#' onClick={handleLogout}>Logout.</a>;
+    return <a href='#' onClick={handleLogout}>Logout</a>;
 }
 
 export default LogoutLink;
