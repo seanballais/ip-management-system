@@ -1,9 +1,18 @@
 import * as React from 'react';
+import AuditLogPanelProps from "./AuditLogPanelProps.ts";
 
-function UserEventsAuditLog(): React.ReactNode {
+function UserEventsAuditLog({
+                                userAuditLogState,
+                                setUserAuditLogState
+                            }: AuditLogPanelProps): React.ReactNode {
+    console.log(userAuditLogState);
+
     return (
-        <div>
-            <h2>User Events</h2>
+        <div id='user-events-audit-log'>
+            <h1>User Events</h1>
+            <table>
+
+            </table>
         </div>
     );
 }

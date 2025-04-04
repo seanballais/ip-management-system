@@ -1,4 +1,4 @@
-import UserData from "../interfaces/UserData.ts";
+import {User} from "./api.ts";
 
 enum TokenType {
     ACCESS_TOKEN = 'access_token',
@@ -9,12 +9,12 @@ const ACCESS_TOKEN_STORAGE_NAME: string = 'accessToken';
 const REFRESH_TOKEN_STORAGE_NAME: string = 'refreshToken';
 
 interface TokenPayload {
-    data: UserData;
+    data: User;
     exp: number;
     token_type: TokenType
 }
 
-function getUserDataFromToken(token: string): UserData {
+function getUserDataFromToken(token: string): User {
     // Based on:
     // - https://medium.com/@feldjesus/how-to-decode-a-jwt-token-175305335024
     const tokenParts: Array<string> = token.split('.');

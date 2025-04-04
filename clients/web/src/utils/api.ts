@@ -13,6 +13,10 @@ enum HTTPMethod {
     DELETE = 'DELETE'
 }
 
+interface GenericBodyData {
+    [key: string]: any;
+}
+
 interface QueryParameters {
     [key: string]: any;
 }
@@ -51,10 +55,6 @@ interface FailedJSONResponse {
     }
 }
 
-interface TokenRefreshBodyData {
-    refresh_token: string;
-}
-
 interface TokenRefreshSuccessJSONResponse {
     data: {
         access_token: string,
@@ -62,8 +62,8 @@ interface TokenRefreshSuccessJSONResponse {
     };
 }
 
-async function postWithTokenRefresh(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
-    const response: Response = await post(path, body, queryParams);
+async function postWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const response: Response = await postWithAccessToken(path, body, queryParams);
     if (response.ok) {
         return response;
     }
@@ -85,16 +85,16 @@ async function postWithTokenRefresh(path: string, body: string, queryParams: Que
     }
 
     // Retry the original operation.
-    return post(path, body, queryParams);
+    return postWithAccessToken(path, body, queryParams);
 }
 
 async function refreshTokens(): Promise<void> {
     const refreshToken: string = localStorage.getItem(REFRESH_TOKEN_STORAGE_NAME) ?? '';
 
-    const bodyData: TokenRefreshBodyData = {
+    const bodyData: GenericBodyData = {
         refresh_token: refreshToken
     };
-    const response: Response = await post('/token/refresh', JSON.stringify(bodyData));
+    const response: Response = await post('/token/refresh', bodyData);
     if (response.ok) {
         const {data}: TokenRefreshSuccessJSONResponse = await response.json();
         localStorage.setItem(ACCESS_TOKEN_STORAGE_NAME, data.access_token);
@@ -106,8 +106,17 @@ async function refreshTokens(): Promise<void> {
     }
 }
 
-async function post(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
-    return fetchAPI(path, HTTPMethod.POST, body, queryParams);
+async function postWithAccessToken(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
+    const bodyData: GenericBodyData = {
+        ...body,
+        access_token: accessToken
+    };
+    return post(path, bodyData, queryParams);
+}
+
+async function post(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.POST, JSON.stringify(body), queryParams);
 }
 
 async function put(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
@@ -138,6 +147,7 @@ export {
 };
 export type {
     APIError,
+    FailedJSONResponse,
     QueryParameters,
     User,
     UserAuditLog,
