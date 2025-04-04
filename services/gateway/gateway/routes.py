@@ -105,7 +105,7 @@ async def access_token_validate(data: AccessTokenValidationData,
     return resp.json()
 
 
-@router.get('/token/refresh')
+@router.post('/token/refresh')
 async def token_refresh(data: TokenRefreshData, response: Response) -> dict:
     url: str = f'{AUTH_SERVICE_URL}/token/refresh'
 
@@ -256,7 +256,7 @@ async def get_ip_addresses(data: GetIPAddressData, response: Response,
     return ips_resp_json
 
 
-@router.get('/audit-log/users')
+@router.post('/audit-log/users')
 async def get_users_audit_log(data: GetAuditLogoData, response: Response,
                               items_per_page: Annotated[
                                   int, Query(le=50)] = 10,
@@ -274,7 +274,7 @@ async def get_users_audit_log(data: GetAuditLogoData, response: Response,
     return resp.json()
 
 
-@router.get('/audit-log/ips')
+@router.post('/audit-log/ips')
 async def get_ips_audit_log(data: GetAuditLogoData, response: Response,
                             items_per_page: Annotated[int, Query(le=50)] = 10,
                             page_number: Annotated[int, Query()] = 0) -> dict:
