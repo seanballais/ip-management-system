@@ -82,7 +82,7 @@ function Login(): React.ReactNode {
             errorMessage: undefined
         }));
 
-        const response: Response = await post('/login', JSON.stringify(bodyData));
+        const response: Response = await post('/login', bodyData);
         if (response.ok) {
             const {data}: LoginSuccessJSONResponse = await response.json();
             localStorage.setItem(ACCESS_TOKEN_STORAGE_NAME, data.authorization.access_token);
