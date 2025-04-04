@@ -4,6 +4,7 @@ import {
 } from "./tokens.ts";
 
 const API_BASE_URL: string = 'http://localhost:8083';
+const MAX_NUM_ITEMS_PER_PAGE: number = 25;
 
 enum HTTPMethod {
     GET = 'GET',
@@ -141,6 +142,7 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string, queryPar
 
 export {
     HTTPMethod,
+    MAX_NUM_ITEMS_PER_PAGE,
     postWithTokenRefresh,
     post,
     put

@@ -24,7 +24,7 @@ function LogoutLink(): React.ReactNode {
 
         // The response is not that important, so we can ignore it. Even if the
         // API call fails, we can still log out the user.
-        await post('/logout', JSON.stringify(bodyData));
+        await post('/logout', bodyData);
 
         clearTokens();
 

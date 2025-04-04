@@ -207,7 +207,7 @@ input, button {
     padding: 0.5rem;
 }
 
-input {
+table, th, td, input {
     border: solid var(--ui-border-size) var(--ui-border-colour);
 }
 
@@ -271,10 +271,32 @@ button {
     }
 }
 
+table {
+    thead {
+        background-color: var(--primary-colour);
+    }
+
+    th, td {
+        padding: 1rem;
+    }
+}
+
+table, th, td {
+    border-collapse: collapse;
+}
+
 .bold {
     font-weight: 700;
 }
 
 .align-right {
     align-items: end;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.margin-center {
+    margin: auto;
 }

@@ -1,0 +1,33 @@
+.panel-audit-log {
+    max-width: 550px;
+
+    margin: auto;
+
+    h1 {
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+
+        margin-bottom: 1rem;
+    }
+
+    .pagination-row {
+        button {
+            width: auto;
+
+            &.prev-button {
+                margin-right: auto;
+            }
+
+            &.next-button {
+                margin-left: auto;
+            }
+        }
+
+        div.page-number {
+            align-content: center;
+        }
+    }
+}

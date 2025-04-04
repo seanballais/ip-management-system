@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import LogoutLink from "../components/LogoutLink/LogoutLink.tsx";
 import {
-    FailedJSONResponse, GenericBodyData,
+    FailedJSONResponse, GenericBodyData, MAX_NUM_ITEMS_PER_PAGE,
     postWithTokenRefresh,
     QueryParameters,
     User, UserAuditLog,
@@ -24,11 +24,8 @@ function MainPage(): React.ReactNode {
     const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
     const userData: User = getUserDataFromToken(accessToken);
 
-    const NUM_ITEMS_PER_PAGE: number = 25;
-    const PAGE_NUMBER: number = 0;
-
     useEffect((): void => {
-        fetchUserAuditLogData(NUM_ITEMS_PER_PAGE, PAGE_NUMBER)
+        fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
             .then(async (response: Response): Promise<UserAuditLogJSONResponse> => {
                 if (response.ok) {
                     return await response.json();
@@ -48,7 +45,7 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((e: unknown): void => {
+            .catch((): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
@@ -61,8 +58,8 @@ function MainPage(): React.ReactNode {
             access_token: accessToken
         };
         const queryParams: QueryParameters = {
-            numItemsPerPage: numItemsPerPage,
-            pageNumber: pageNumber
+            items_per_page: numItemsPerPage,
+            page_number: pageNumber
         };
         try {
             return await postWithTokenRefresh('/audit-log/users', bodyData, queryParams);
