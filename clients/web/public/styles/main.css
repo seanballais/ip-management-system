@@ -263,6 +263,16 @@ button {
 
         width: 100%;
     }
+
+    .panel {
+        h1 {
+            font-size: var(--font-size-4);
+        }
+
+        h2 {
+            font-size: var(--font-size-5);
+        }
+    }
 }
 
 .bold {
