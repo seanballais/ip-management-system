@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import LogoutLink from "../components/LogoutLink/LogoutLink.tsx";
 import {
-    FailedJSONResponse,
+    FailedJSONResponse, GenericBodyData,
     postWithTokenRefresh,
     QueryParameters,
     User, UserAuditLog,
@@ -14,10 +14,6 @@ import {
 } from "../utils/tokens.ts";
 import AuditLogPanel from "../components/AuditLog/AuditLogPanel.tsx";
 import {UserAuditLogState} from "../interfaces.ts";
-
-interface RequestWithTokenBodyData {
-    access_token: string;
-}
 
 function MainPage(): React.ReactNode {
     const [userAuditLogState, setUserAuditLogState] = useState<UserAuditLogState>({
@@ -52,7 +48,7 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((e: Error): void => {
+            .catch((): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
@@ -61,7 +57,7 @@ function MainPage(): React.ReactNode {
     }, []);
 
     async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
-        const bodyData: RequestWithTokenBodyData = {
+        const bodyData: GenericBodyData = {
             access_token: accessToken
         };
         const queryParams: QueryParameters = {
@@ -69,7 +65,7 @@ function MainPage(): React.ReactNode {
             pageNumber: pageNumber
         };
         try {
-            return await postWithTokenRefresh('/audit-log/users', JSON.stringify(bodyData), queryParams);
+            return await postWithTokenRefresh('/audit-log/users', bodyData, queryParams);
         } catch (e: unknown) {
             throw e as Error;
         }

@@ -148,6 +148,7 @@ export {
 export type {
     APIError,
     FailedJSONResponse,
+    GenericBodyData,
     QueryParameters,
     User,
     UserAuditLog,
