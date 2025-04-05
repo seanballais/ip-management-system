@@ -164,16 +164,99 @@ function IPAddressTableRows({
 
     return (
         dataState.ips.map((ip: IP): React.ReactNode => (
-            <tr key={ip.id}>
-                <td>{ip.ip_address}</td>
-                <td>{ip.label}</td>
-                <td>{ip.comment}</td>
-                <th scope='row'>@{ip.recorder.username}</th>
-                <td>
-                    <button>Edit</button>
-                </td>
-            </tr>
+            <IPAddressTableRow key={ip.id} id={ip.id} ipAddress={ip.ip_address}
+                               label={ip.label} comment={ip.comment}
+                               recorderUsername={ip.recorder.username}/>
         ))
+    );
+}
+
+interface RowProps {
+    id: number,
+    ipAddress: string,
+    label: string;
+    comment: string;
+    recorderUsername: string
+}
+
+enum RowMode {
+    VIEWING,
+    EDITING
+}
+
+interface RowState {
+    ipAddress: string,
+    label: string;
+    comment: string;
+    mode: RowMode
+}
+
+function IPAddressTableRow({
+                               id,
+                               ipAddress,
+                               label,
+                               comment, recorderUsername
+                           }: RowProps): React.ReactNode {
+    const [rowState, setRowState] = useState<RowState>({
+        ipAddress: ipAddress,
+        label: label,
+        comment: comment,
+        mode: RowMode.VIEWING
+    });
+
+    function switchRowMode(): void {
+        if (rowState.mode === RowMode.VIEWING) {
+            setRowState((state: RowState): RowState => ({
+                ...state,
+                mode: RowMode.EDITING
+            }));
+        } else {
+            setRowState((state: RowState): RowState => ({
+                ...state,
+                mode: RowMode.VIEWING
+            }));
+        }
+    }
+
+    return (
+        <tr key={id}>
+            {
+                (rowState.mode === RowMode.VIEWING)
+                    ? (
+                        <>
+                            <td>{rowState.ipAddress}</td>
+                            <td>{rowState.label}</td>
+                            <td>{rowState.comment}</td>
+                            <th scope='row'>@{recorderUsername}</th>
+                            <td>
+                                <button onClick={switchRowMode}>Edit</button>
+                            </td>
+                        </>
+                    ) : (
+                        <>
+                            <td>
+                                <input type='text' placeholder='IP Address'
+                                       name='ipAddress'
+                                       value={rowState.ipAddress}/>
+                            </td>
+                            <td>
+                                <input type='text' placeholder='Label'
+                                       name='label'
+                                       value={rowState.label}/>
+                            </td>
+                            <td>
+                                <input type='text' placeholder='Comment'
+                                       name='comment'
+                                       value={rowState.comment}/>
+                            </td>
+                            <th scope='row'>@{recorderUsername}</th>
+                            <td>
+                                <button onClick={switchRowMode}>Cancel</button>
+                            </td>
+                        </>
+                    )
+            }
+        </tr>
     );
 }
 
