@@ -5,3 +5,35 @@ div.add-ip-address-form-container {
         height: 100%;
     }
 }
+
+.ip-address-table-container {
+    margin: auto;
+
+    h1 {
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+
+        margin-bottom: 1rem;
+    }
+
+    .pagination-row {
+        button {
+            width: auto;
+
+            &.previous-button {
+                margin-right: auto;
+            }
+
+            &.next-button {
+                margin-left: auto;
+            }
+        }
+
+        div.page-number {
+            align-content: center;
+        }
+    }
+}

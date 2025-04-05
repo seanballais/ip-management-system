@@ -194,7 +194,18 @@ form {
         flex-direction: column;
 
         margin-bottom: 1rem;
-        padding: 1rem;
+    }
+
+    &.row {
+        div.form-group {
+            &:first-child {
+                padding-left: 0 !important;
+            }
+
+            &:last-child {
+                padding-right: 0 !important;
+            }
+        }
     }
 }
 
@@ -304,6 +315,14 @@ table, th, td {
 
 .margin-top-32px {
     margin-top: 32px !important;
+}
+
+.padding-1-rem {
+    padding: 1rem !important;
+}
+
+.no-padding {
+    padding: 0 !important;
 }
 
 .max-width-initial {

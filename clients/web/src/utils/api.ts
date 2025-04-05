@@ -60,6 +60,13 @@ interface IPEventData {
     comment?: string;
 }
 
+interface IPAddressData {
+    count: number;
+    num_total_items: number;
+    page_number: number;
+    ips: Array<IP>;
+}
+
 interface UserAuditLog {
     count: number;
     num_total_items: number;
@@ -72,6 +79,10 @@ interface IPAuditLog {
     num_total_items: number;
     page_number: number;
     events: Array<IPEvent>;
+}
+
+interface IPAddressDataJSONResponse {
+    data: IPAddressData;
 }
 
 interface UserAuditLogJSONResponse {
@@ -97,6 +108,14 @@ interface TokenRefreshSuccessJSONResponse {
         access_token: string,
         refresh_token: string
     };
+}
+
+async function fetchIPAddressData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
+    const queryParams: QueryParameters = {
+        items_per_page: numItemsPerPage,
+        page_number: pageNumber
+    };
+    return get('/ips', queryParams);
 }
 
 async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {
@@ -176,6 +195,10 @@ async function postWithAccessToken(path: string, body: GenericBodyData, queryPar
     return post(path, bodyData, queryParams);
 }
 
+async function get(path: string, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.GET, null, queryParams);
+}
+
 async function post(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     return fetchAPI(path, HTTPMethod.POST, JSON.stringify(body), queryParams);
 }
@@ -184,7 +207,7 @@ async function put(path: string, body: string, queryParams: QueryParameters | nu
     return fetchAPI(path, HTTPMethod.PUT, body, queryParams);
 }
 
-async function fetchAPI(path: string, method: HTTPMethod, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
+async function fetchAPI(path: string, method: HTTPMethod, body: string | null, queryParams: QueryParameters | null = null): Promise<Response> {
     let url: string = `${API_BASE_URL}${path}`;
     if (queryParams !== null) {
         const params: URLSearchParams = new URLSearchParams(queryParams);
@@ -203,6 +226,7 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string, queryPar
 export {
     HTTPMethod,
     MAX_NUM_ITEMS_PER_PAGE,
+    fetchIPAddressData,
     fetchIPAuditLogData,
     fetchUserAuditLogData,
     postWithTokenRefresh,
@@ -214,6 +238,8 @@ export type {
     FailedJSONResponse,
     GenericBodyData,
     IP,
+    IPAddressData,
+    IPAddressDataJSONResponse,
     IPAuditLog,
     IPAuditLogJSONResponse,
     IPEvent,
