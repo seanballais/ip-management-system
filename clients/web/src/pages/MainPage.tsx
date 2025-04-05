@@ -176,7 +176,8 @@ function MainPage(): React.ReactNode {
                             ipAddressTableState={ipAddressTableState}
                             setIPAddressTableState={setIPAddressTableState}
                             addIPAddressFormCallback={fetchData}
-                            editIPAddressTableRowCallback={refetchAuditLogOnTableEdit}/>
+                            editIPAddressTableRowCallback={refetchAuditLogOnTableEdit}
+                            deleteIPAddressTableRowCallback={fetchData}/>
                         : <AuditLogPanel userAuditLogState={userAuditLogState}
                                          ipAuditLogState={ipAuditLogState}
                                          setUserAuditLogState={setUserAuditLogState}

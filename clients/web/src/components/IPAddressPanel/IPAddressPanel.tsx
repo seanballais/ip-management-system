@@ -7,6 +7,7 @@ function IPAddressPanel({
                             user,
                             addIPAddressFormCallback,
                             editIPAddressTableRowCallback,
+                            deleteIPAddressTableRowCallback,
                             ipAddressTableState,
                             setIPAddressTableState
                         }: IPAddressPanelProps): React.ReactNode {
@@ -16,7 +17,8 @@ function IPAddressPanel({
             <IPAddressTable user={user}
                             ipAddressTableState={ipAddressTableState}
                             setIPAddressTableState={setIPAddressTableState}
-                            editIPAddressTableRowCallback={editIPAddressTableRowCallback}/>
+                            editIPAddressTableRowCallback={editIPAddressTableRowCallback}
+                            deleteIPAddressTableRowCallback={deleteIPAddressTableRowCallback}/>
         </div>
     );
 }

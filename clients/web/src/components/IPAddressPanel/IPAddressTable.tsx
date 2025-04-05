@@ -5,7 +5,7 @@ import {
     FailedJSONResponse,
     fetchIPAddressData,
     updateIPAddressData,
-    IP, IPAddressData, IPAddressDataJSONResponse, User
+    IP, IPAddressData, IPAddressDataJSONResponse, User, deleteIPAddress
 } from "../../utils/api.ts";
 import IPAddressDataState from './IPAddressDataState.tsx';
 import {IPAddressTableProps} from "./props.ts";
@@ -25,7 +25,8 @@ function IPAddressTable({
                             user,
                             ipAddressTableState,
                             setIPAddressTableState,
-                            editIPAddressTableRowCallback
+                            editIPAddressTableRowCallback,
+                            deleteIPAddressTableRowCallback
                         }: IPAddressTableProps): React.ReactNode {
     const tableRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +128,8 @@ function IPAddressTable({
                 <IPAddressTableRows parentState={state}
                                     dataState={ipAddressTableState}
                                     user={user}
-                                    rowEditCallback={editIPAddressTableRowCallback}/>
+                                    rowEditCallback={editIPAddressTableRowCallback}
+                                    rowDeleteCallback={deleteIPAddressTableRowCallback}/>
                 </tbody>
             </table>
             <div className='row pagination-row'>
@@ -152,13 +154,15 @@ interface IPAddressTableRowsState {
     parentState: TableState;
     dataState: IPAddressDataState;
     rowEditCallback: CallbackFunc;
+    rowDeleteCallback: CallbackFunc;
 }
 
 function IPAddressTableRows({
                                 user,
                                 parentState,
                                 dataState,
-                                rowEditCallback
+                                rowEditCallback,
+                                rowDeleteCallback
                             }: IPAddressTableRowsState): React.ReactNode {
     if (dataState.ips.length === 0) {
         if (parentState.isLoadingData) {
@@ -182,7 +186,8 @@ function IPAddressTableRows({
                                label={ip.label} comment={ip.comment}
                                recorderUsername={ip.recorder.username}
                                user={user}
-                               rowEditCallback={rowEditCallback}/>
+                               rowEditCallback={rowEditCallback}
+                               rowDeleteCallback={rowDeleteCallback}/>
         ))
     );
 }
@@ -194,7 +199,8 @@ interface RowProps {
     comment: string;
     recorderUsername: string
     user: User;
-    rowEditCallback: CallbackFunc
+    rowEditCallback: CallbackFunc;
+    rowDeleteCallback: CallbackFunc;
 }
 
 enum RowMode {
@@ -221,7 +227,8 @@ function IPAddressTableRow({
                                label,
                                comment, recorderUsername,
                                user,
-                               rowEditCallback
+                               rowEditCallback,
+                               rowDeleteCallback
                            }: RowProps): React.ReactNode {
     const ipAddressInputRef = useRef<HTMLInputElement>(null);
     const labelInputRef = useRef<HTMLInputElement>(null);
@@ -325,6 +332,31 @@ function IPAddressTableRow({
         }));
     }
 
+    async function handleDeleteIPAddress(): Promise<void> {
+        setRowState((data: RowState): RowState => ({
+            ...data,
+            ipAddressErrorMessage: undefined,
+            labelErrorMessage: undefined,
+            isIPAddressInputEnabled: false,
+            isLabelInputEnabled: false,
+            isCommentInputEnabled: false,
+            areButtonsEnabled: false
+        }));
+
+        const response: Response = await deleteIPAddress(id);
+        if (response.ok) {
+            rowDeleteCallback();
+        }
+
+        setRowState((data: RowState): RowState => ({
+            ...data,
+            isIPAddressInputEnabled: true,
+            isLabelInputEnabled: true,
+            isCommentInputEnabled: true,
+            areButtonsEnabled: true
+        }));
+    }
+
     function switchRowMode(): void {
         if (rowState.mode === RowMode.VIEWING) {
             setRowState((state: RowState): RowState => ({
@@ -355,7 +387,8 @@ function IPAddressTableRow({
                                 </button>
                                 {
                                     (user.is_superuser)
-                                        ? <button>Delete</button>
+                                        ? <button
+                                            onClick={handleDeleteIPAddress}>Delete</button>
                                         : null
                                 }
                             </td>

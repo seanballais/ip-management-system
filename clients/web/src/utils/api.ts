@@ -167,6 +167,14 @@ async function updateIPAddressData(id: number, ipAddress: string | null, label: 
     }
 }
 
+async function deleteIPAddress(id: number): Promise<Response> {
+    try {
+        return await deleteWithTokenRefresh(`/ips/${id}`, {});
+    } catch (e: unknown) {
+        throw e as Error;
+    }
+}
+
 async function postWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     const response: Response = await postWithAccessToken(path, body, queryParams);
     if (response.ok) {
@@ -225,6 +233,35 @@ async function patchWithTokenRefresh(path: string, body: GenericBodyData, queryP
     return patchWithAccessToken(path, body, queryParams);
 }
 
+async function deleteWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const response: Response = await deleteWithAccessToken(path, body, queryParams);
+    if (response.ok) {
+        return response;
+    }
+
+    // Check first if the error is about an invalid access token.
+    const origResponse: Response = response.clone();
+    const {detail}: FailedJSONResponse = await response.json();
+    if (detail.errors[0].code === 'invalid_access_token') {
+        // Refresh tokens.
+        console.log('Access token is invalid. Refreshing tokens before resending patch.')
+
+        try {
+            await refreshTokens();
+        } catch (error: unknown) {
+            // The tokens are likely to no longer be valid.
+            throw error as Error;
+        }
+    } else {
+        // Error is something else. Just return the response.
+        return origResponse;
+    }
+
+    // Retry the original operation.
+    console.log('Tokens refreshed. Resending patch.')
+    return deleteWithAccessToken(path, body, queryParams);
+}
+
 async function refreshTokens(): Promise<void> {
     const refreshToken: string = localStorage.getItem(REFRESH_TOKEN_STORAGE_NAME) ?? '';
 
@@ -262,6 +299,16 @@ async function patchWithAccessToken(path: string, body: GenericBodyData, queryPa
     return patch(path, bodyData, queryParams);
 }
 
+async function deleteWithAccessToken(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
+    const bodyData: GenericBodyData = {
+        ...body,
+        access_token: accessToken
+    };
+
+    return deleteReq(path, bodyData, queryParams);
+}
+
 async function post(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     return fetchAPI(path, HTTPMethod.POST, JSON.stringify(body), queryParams);
 }
@@ -272,6 +319,10 @@ async function put(path: string, body: string, queryParams: QueryParameters | nu
 
 async function patch(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     return fetchAPI(path, HTTPMethod.PATCH, JSON.stringify(body), queryParams);
+}
+
+async function deleteReq(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.DELETE, JSON.stringify(body), queryParams);
 }
 
 async function fetchAPI(path: string, method: HTTPMethod, body: string | null, queryParams: QueryParameters | null = null): Promise<Response> {
@@ -297,7 +348,9 @@ export {
     fetchIPAuditLogData,
     fetchUserAuditLogData,
     updateIPAddressData,
+    deleteIPAddress,
     postWithTokenRefresh,
+    deleteWithTokenRefresh,
     post,
     put
 };

@@ -7,6 +7,7 @@ interface IPAddressPanelProps {
     user: User;
     addIPAddressFormCallback: CallbackFunc;
     editIPAddressTableRowCallback: CallbackFunc;
+    deleteIPAddressTableRowCallback: CallbackFunc;
     ipAddressTableState: IPAddressDataState;
     setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }
@@ -14,6 +15,7 @@ interface IPAddressPanelProps {
 interface IPAddressTableProps {
     user: User;
     editIPAddressTableRowCallback: CallbackFunc;
+    deleteIPAddressTableRowCallback: CallbackFunc;
     ipAddressTableState: IPAddressDataState;
     setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }
