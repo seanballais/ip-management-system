@@ -184,7 +184,7 @@ function IPAddressTableRows({
         dataState.ips.map((ip: IP): React.ReactNode => (
             <IPAddressTableRow key={ip.id} id={ip.id} ipAddress={ip.ip_address}
                                label={ip.label} comment={ip.comment}
-                               recorderUsername={ip.recorder.username}
+                               recorder={ip.recorder}
                                user={user}
                                rowEditCallback={rowEditCallback}
                                rowDeleteCallback={rowDeleteCallback}/>
@@ -197,7 +197,7 @@ interface RowProps {
     ipAddress: string,
     label: string;
     comment: string;
-    recorderUsername: string
+    recorder: User;
     user: User;
     rowEditCallback: CallbackFunc;
     rowDeleteCallback: CallbackFunc;
@@ -225,7 +225,7 @@ function IPAddressTableRow({
                                id,
                                ipAddress,
                                label,
-                               comment, recorderUsername,
+                               comment, recorder,
                                user,
                                rowEditCallback,
                                rowDeleteCallback
@@ -369,6 +369,12 @@ function IPAddressTableRow({
                 mode: RowMode.VIEWING
             }));
         }
+
+        setRowState((data: RowState): RowState => ({
+            ...data,
+            ipAddressErrorMessage: undefined,
+            labelErrorMessage: undefined
+        }));
     }
 
     return (
@@ -380,11 +386,14 @@ function IPAddressTableRow({
                             <td>{rowState.ipAddress}</td>
                             <td>{rowState.label}</td>
                             <td>{rowState.comment}</td>
-                            <th scope='row'>@{recorderUsername}</th>
+                            <th scope='row'>@{recorder.username}</th>
                             <td>
-                                <button className='margin-right-1rem'
-                                        onClick={switchRowMode}>Edit
-                                </button>
+                                {
+                                    (user.id == recorder.id)
+                                        ? <button className='margin-right-1rem'
+                                                  onClick={switchRowMode}>Edit</button>
+                                        : null
+                                }
                                 {
                                     (user.is_superuser)
                                         ? <button
@@ -433,7 +442,7 @@ function IPAddressTableRow({
                             </td>
                             <th scope='row'>
                                 <div
-                                    className='form-group'>@{recorderUsername}</div>
+                                    className='form-group'>@{recorder.username}</div>
                             </th>
                             <td>
                                 <div className='form-group'>
