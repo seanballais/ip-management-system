@@ -255,7 +255,22 @@ function IPAddressTableRow({
             commentValue = rowState.comment;
         }
 
-        const response: Response = await updateIPAddressData(id, ipAddressValue, labelValue, commentValue);
+        let ipAddressUpdateValue: string | null = null;
+        if (ipAddressValue != rowState.ipAddress) {
+            ipAddressUpdateValue = ipAddressValue;
+        }
+
+        let labelUpdateValue: string | null = null;
+        if (labelValue != rowState.label) {
+            labelUpdateValue = labelValue;
+        }
+
+        let commentUpdateValue: string | null = null;
+        if (commentValue != rowState.comment) {
+            commentUpdateValue = commentValue
+        }
+
+        const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
         if (response.ok) {
             setRowState((data: RowState): RowState => ({
                 ...data,

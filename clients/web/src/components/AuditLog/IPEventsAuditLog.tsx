@@ -264,8 +264,8 @@ function EventCellData({event}: EventCellDataProps): React.ReactNode {
 
     if (event.new_data && event.new_data.label !== undefined) {
         diff.changes['Label'] = {
-            oldValue: event.old_data.ip_address,
-            newValue: event.new_data.ip_address
+            oldValue: event.old_data.label,
+            newValue: event.new_data.label
         };
     }
 
