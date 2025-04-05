@@ -30,4 +30,10 @@
             align-content: center;
         }
     }
+
+    ul.audit-log-diff-list {
+        font-size: var(--font-size-6);
+
+        list-style-position: inside;
+    }
 }
