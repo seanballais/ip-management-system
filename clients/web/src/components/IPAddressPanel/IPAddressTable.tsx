@@ -106,7 +106,7 @@ function IPAddressTable({
         <div
             className='ip-address-table-container max-width-initial'
             ref={tableRef}>
-            <h1>IP Address Events</h1>
+            <h1>IP Addresses</h1>
             <table>
                 <thead>
                 <tr>
