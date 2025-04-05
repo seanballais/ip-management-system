@@ -6,7 +6,7 @@ label.form-input-message {
 }
 
 label.form-input-success-message {
-    color: var(--primary-colour);
+    color: var(--text-colour);
 }
 
 label.form-input-error-message {
