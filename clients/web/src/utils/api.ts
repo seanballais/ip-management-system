@@ -50,8 +50,14 @@ interface IPEvent {
     type: string;
     ip: IP;
     trigger_user: User;
-    old_data: { [key: string]: any };
-    new_data: { [key: string]: any };
+    old_data: IPEventData;
+    new_data: IPEventData;
+}
+
+interface IPEventData {
+    ip_address?: string;
+    label?: string;
+    comment?: string;
 }
 
 interface UserAuditLog {

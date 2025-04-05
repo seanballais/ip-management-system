@@ -7,7 +7,6 @@ import {
     MAX_NUM_ITEMS_PER_PAGE,
 } from "../../utils/api.ts";
 import {clearTokens} from "../../utils/tokens.ts";
-import {capitalizeString} from "../../utils/strings.ts";
 import IPAuditLogState from "./IPAuditLogState.ts";
 
 interface LogState {
@@ -104,37 +103,6 @@ function IPEventsAuditLog({
             });
     }
 
-    function IPAuditLogRows({
-                                parentState,
-                                dataState
-                            }: IPAuditLogRowsState): React.ReactNode {
-        if (dataState.events.length === 0) {
-            if (parentState.isLoadingData) {
-                return (
-                    <tr className='text-align-center'>
-                        <td colSpan={3}>Loading data...</td>
-                    </tr>
-                );
-            } else {
-                return (
-                    <tr className='text-align-center'>
-                        <td colSpan={3}>No user event logged.</td>
-                    </tr>
-                );
-            }
-        }
-
-        return (
-            dataState.events.map((event: IPEvent): React.ReactNode => (
-                <tr key={event.id}>
-                    <td>{event.recorded_on}</td>
-                    <td>{capitalizeString(event.type)}</td>
-                    <th scope='row'>@{event.trigger_user.username}</th>
-                </tr>
-            ))
-        )
-    }
-
     return (
         <div className='panel-audit-log margin-top-32px max-width-initial'
              ref={logRef}>
@@ -143,8 +111,9 @@ function IPEventsAuditLog({
                 <thead>
                 <tr>
                     <th scope='col'>Recorded On (UTC)</th>
-                    <th scope='col'>Event Type</th>
-                    <th scope='col'>User</th>
+                    <th scope='col'>IP Address</th>
+                    <th scope='col'>Event</th>
+                    <th scope='col'>User Responsible</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -166,6 +135,178 @@ function IPEventsAuditLog({
                     onClick={handleNextButtonClick}>Next &rarr;</button>
             </div>
         </div>
+    );
+}
+
+function IPAuditLogRows({
+                            parentState,
+                            dataState
+                        }: IPAuditLogRowsState): React.ReactNode {
+    if (dataState.events.length === 0) {
+        if (parentState.isLoadingData) {
+            return (
+                <tr className='text-align-center'>
+                    <td colSpan={4}>Loading data...</td>
+                </tr>
+            );
+        } else {
+            return (
+                <tr className='text-align-center'>
+                    <td colSpan={4}>No user event logged.</td>
+                </tr>
+            );
+        }
+    }
+
+    return (
+        dataState.events.map((event: IPEvent): React.ReactNode => {
+
+
+            return (
+                <tr key={event.id}>
+                    <td>{event.recorded_on}</td>
+                    <td>{event.ip.ip_address}</td>
+                    <td>
+                        <EventCellData event={event}/>
+                    </td>
+                    <th scope='row'>@{event.trigger_user.username}</th>
+                </tr>
+            );
+        })
+    );
+}
+
+interface DataDelta {
+    oldValue: any;
+    newValue: any;
+}
+
+interface EventCellDataProps {
+    event: IPEvent;
+}
+
+enum BaseEventType {
+    ADDED,
+    MODIFIED,
+    DELETED,
+    NO_EVENT
+}
+
+interface EventCellDataDiff {
+    eventID: number;
+    baseEventType: BaseEventType;
+    changes: { [attribute: string]: DataDelta };
+}
+
+function EventCellData({event}: EventCellDataProps): React.ReactNode {
+    let eventType: string;
+    let diff: EventCellDataDiff = {
+        eventID: event.id,
+        baseEventType: BaseEventType.NO_EVENT,
+        changes: {}
+    };
+    switch (event.type) {
+        case 'ip_address_added': {
+            eventType = 'Added IP address.'
+            diff.baseEventType = BaseEventType.ADDED;
+            break;
+        }
+        case 'ip_address_modified_ip': {
+            eventType = 'Modified IP address.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_ip_label': {
+            eventType = 'Modified IP address and label.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_ip_comment': {
+            eventType = 'Modified IP address and comment.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_ip_label_comment': {
+            eventType = 'Modified IP address, label, and comment.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_label': {
+            eventType = 'Modified label';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_label_comment': {
+            eventType = 'Modified label and comment.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_modified_comment': {
+            eventType = 'Modified comment.';
+            diff.baseEventType = BaseEventType.MODIFIED;
+            break;
+        }
+        case 'ip_address_deleted': {
+            eventType = 'Deleted IP Address.';
+            diff.baseEventType = BaseEventType.DELETED;
+            break;
+        }
+        default: {
+            eventType = 'Unknown Event';
+            diff.baseEventType = BaseEventType.NO_EVENT;
+        }
+    }
+
+    if (event.new_data && event.new_data.ip_address !== undefined) {
+        diff.changes['IP Address'] = {
+            oldValue: event.old_data.ip_address,
+            newValue: event.new_data.ip_address
+        };
+    }
+
+    if (event.new_data && event.new_data.label !== undefined) {
+        diff.changes['Label'] = {
+            oldValue: event.old_data.ip_address,
+            newValue: event.new_data.ip_address
+        };
+    }
+
+    if (event.new_data && event.new_data.comment !== undefined) {
+        diff.changes['Comment'] = {
+            oldValue: event.old_data.comment,
+            newValue: event.new_data.comment
+        };
+    }
+
+    return (
+        <>
+            <p>{eventType}</p>
+            <EventCellDiff diff={diff}/>
+        </>
+    );
+}
+
+interface EventCellDiffProps {
+    diff: EventCellDataDiff
+}
+
+function EventCellDiff({diff}: EventCellDiffProps): React.ReactNode {
+    if (diff.baseEventType === BaseEventType.NO_EVENT) {
+        return null;
+    }
+
+    return (
+        <ul className='audit-log-diff-list'>
+            {
+                Object.entries(diff.changes).map(
+                    ([attribute, delta]: [string, DataDelta]) => (
+                        <li key={diff.eventID + attribute}>
+                            {attribute}: {delta.oldValue && <>{delta.oldValue}&nbsp;&rarr;&nbsp;</>}{delta.newValue}
+                        </li>
+                    )
+                )
+            }
+        </ul>
     );
 }
 
