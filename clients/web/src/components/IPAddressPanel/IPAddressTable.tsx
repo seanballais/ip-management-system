@@ -108,7 +108,6 @@ function IPAddressTable({
             <table>
                 <thead>
                 <tr>
-                    <th scope='col'>Added On (UTC)</th>
                     <th scope='col'>IP Address</th>
                     <th scope='col'>Label</th>
                     <th scope='col'>Comment</th>
@@ -151,13 +150,13 @@ function IPAddressTableRows({
         if (parentState.isLoadingData) {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={6}>Loading data...</td>
+                    <td colSpan={5}>Loading data...</td>
                 </tr>
             );
         } else {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={6}>No IP address added.</td>
+                    <td colSpan={5}>No IP address added.</td>
                 </tr>
             );
         }
@@ -166,7 +165,6 @@ function IPAddressTableRows({
     return (
         dataState.ips.map((ip: IP): React.ReactNode => (
             <tr key={ip.id}>
-                <td>{ip.created_on}</td>
                 <td>{ip.ip_address}</td>
                 <td>{ip.label}</td>
                 <td>{ip.comment}</td>
