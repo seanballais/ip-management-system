@@ -31,7 +31,11 @@ function MainPage(): React.ReactNode {
     const userData: User = getUserDataFromToken(accessToken);
 
     useEffect((): void => {
-        fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
+        fetchAuditLogData();
+    }, []);
+
+    async function fetchAuditLogData(): Promise<void> {
+        await fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
             .then(async (response: Response): Promise<UserAuditLogJSONResponse> => {
                 if (response.ok) {
                     return await response.json();
@@ -51,13 +55,13 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((): void => {
+            .catch((e: unknown): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
                 window.location.reload();
             });
-        fetchIPAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
+        await fetchIPAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
             .then(async (response: Response): Promise<IPAuditLogJSONResponse> => {
                 if (response.ok) {
                     return await response.json();
@@ -77,13 +81,13 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((): void => {
+            .catch((e: unknown): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
                 window.location.reload();
             });
-    }, []);
+    }
 
     return (
         <>
