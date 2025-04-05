@@ -270,30 +270,34 @@ function IPAddressTableRow({
             commentUpdateValue = commentValue
         }
 
-        const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
-        if (response.ok) {
-            setRowState((data: RowState): RowState => ({
-                ...data,
-                ipAddress: ipAddressValue,
-                label: labelValue,
-                comment: commentValue,
-            }));
-            switchRowMode();
-        } else {
-            const {detail}: FailedJSONResponse = await response.json();
+        if (ipAddressUpdateValue || labelUpdateValue || commentUpdateValue) {
+            const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
+            if (response.ok) {
+                setRowState((data: RowState): RowState => ({
+                    ...data,
+                    ipAddress: ipAddressValue,
+                    label: labelValue,
+                    comment: commentValue,
+                }));
+                switchRowMode();
+            } else {
+                const {detail}: FailedJSONResponse = await response.json();
 
-            // We already know that there is one error that is returned.
-            if (detail.errors[0].code === 'invalid_ip_address') {
-                setRowState((data: RowState): RowState => ({
-                    ...data,
-                    ipAddressErrorMessage: 'Invalid IP address.'
-                }));
-            } else if (detail.errors[0].code === 'unavailable_label') {
-                setRowState((data: RowState): RowState => ({
-                    ...data,
-                    labelErrorMessage: 'Label is already used.'
-                }));
+                // We already know that there is one error that is returned.
+                if (detail.errors[0].code === 'invalid_ip_address') {
+                    setRowState((data: RowState): RowState => ({
+                        ...data,
+                        ipAddressErrorMessage: 'Invalid IP address.'
+                    }));
+                } else if (detail.errors[0].code === 'unavailable_label') {
+                    setRowState((data: RowState): RowState => ({
+                        ...data,
+                        labelErrorMessage: 'Label is already used.'
+                    }));
+                }
             }
+        } else {
+            switchRowMode();
         }
 
         setRowState((data: RowState): RowState => ({
@@ -340,6 +344,7 @@ function IPAddressTableRow({
                                     <input ref={ipAddressInputRef}
                                            type='text' placeholder='IP Address'
                                            name='ipAddress'
+                                           size={20}
                                            defaultValue={rowState.ipAddress}
                                            disabled={!rowState.isIPAddressInputEnabled}/>
                                     <FormInputMessage targetInput='ipAddress'
@@ -352,6 +357,7 @@ function IPAddressTableRow({
                                     <input ref={labelInputRef}
                                            type='text' placeholder='Label'
                                            name='label'
+                                           size={20}
                                            defaultValue={rowState.label}
                                            disabled={!rowState.isLabelInputEnabled}/>
                                     <FormInputMessage targetInput='label'
@@ -360,21 +366,29 @@ function IPAddressTableRow({
                                 </div>
                             </td>
                             <td>
-                                <input ref={commentInputRef}
-                                       type='text' placeholder='Comment'
-                                       name='comment'
-                                       defaultValue={rowState.comment}
-                                       disabled={!rowState.isCommentInputEnabled}/>
+                                <div className='form-group'>
+                                    <input ref={commentInputRef}
+                                           type='text' placeholder='Comment'
+                                           name='comment'
+                                           size={10}
+                                           defaultValue={rowState.comment}
+                                           disabled={!rowState.isCommentInputEnabled}/>
+                                </div>
                             </td>
-                            <th scope='row'>@{recorderUsername}</th>
+                            <th scope='row'>
+                                <div
+                                    className='form-group'>@{recorderUsername}</div>
+                            </th>
                             <td>
-                                <button className='margin-right-1rem'
-                                        disabled={!rowState.areButtonsEnabled}
-                                        onClick={handleUpdateIPAddress}>Save
-                                </button>
-                                <button disabled={!rowState.areButtonsEnabled}
-                                        onClick={switchRowMode}>Cancel
-                                </button>
+                                <div className='form-group'>
+                                    <button className='margin-right-1rem'
+                                            disabled={!rowState.areButtonsEnabled}
+                                            onClick={handleUpdateIPAddress}>Save
+                                    </button>
+                                    <button disabled={!rowState.areButtonsEnabled}
+                                            onClick={switchRowMode}>Cancel
+                                    </button>
+                                </div>
                             </td>
                         </>
                     )
