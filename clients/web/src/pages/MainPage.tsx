@@ -115,11 +115,14 @@ function MainPage(): React.ReactNode {
             <section className='container'>
                 <TabBar tabBarState={tabBarState}
                         setTabBarState={setTabBarState}/>
-                <AuditLogPanel userAuditLogState={userAuditLogState}
-                               ipAuditLogState={ipAuditLogState}
-                               setUserAuditLogState={setUserAuditLogState}
-                               setIPAuditLogState={setIPAuditLogState}
-                />
+                {
+                    (tabBarState.activeTabIndex == 0)
+                        ? <div>IP Addresses</div>
+                        : <AuditLogPanel userAuditLogState={userAuditLogState}
+                                         ipAuditLogState={ipAuditLogState}
+                                         setUserAuditLogState={setUserAuditLogState}
+                                         setIPAuditLogState={setIPAuditLogState}/>
+                }
             </section>
         </>
     );
