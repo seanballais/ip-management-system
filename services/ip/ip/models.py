@@ -10,7 +10,7 @@ class IPAddress(SQLModel, table=True):
         nullable=False,
         sa_column_kwargs={'server_default': text('CURRENT_TIMESTAMP')})
     ip_address: str = Field(index=True)
-    label: str = Field(unique=True)
+    label: str = Field()
     comment: typing.Optional[str]
     recorder_id: typing.Optional[int]
     is_deleted: bool = Field(default=False)
