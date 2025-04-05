@@ -7,6 +7,7 @@ import {
     postWithTokenRefresh
 } from "../../utils/api.ts";
 import {FormInputMessage, FormInputMessageType} from "../../components.tsx";
+import {CallbackFunc} from "../../utils/types.ts";
 
 interface AddIPFormState {
     ipAddress?: string;
@@ -21,7 +22,11 @@ interface AddIPFormState {
     isSubmitButtonEnabled: boolean;
 }
 
-function AddIPAddressForm(): React.ReactNode {
+interface Props {
+    callback: CallbackFunc;
+}
+
+function AddIPAddressForm({callback}: Props): React.ReactNode {
     const [formData, setFormData] = useState<AddIPFormState>({
         isIPAddressInputEnabled: true,
         isLabelInputEnabled: true,
@@ -77,6 +82,9 @@ function AddIPAddressForm(): React.ReactNode {
             if (commentInput.current) {
                 commentInput.current.value = '';
             }
+
+            // This should update our IP address table.
+            callback();
         } else {
             const {detail}: FailedJSONResponse = await response.json();
 

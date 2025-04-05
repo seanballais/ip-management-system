@@ -6,8 +6,9 @@ from sqlmodel import Field, JSON, Relationship, SQLModel, text
 
 class IPAddress(SQLModel, table=True):
     id: typing.Optional[int] = Field(default=None, primary_key=True)
-    created_on: datetime = Field(default=datetime.now(timezone.utc),
-                                 nullable=False)
+    created_on: datetime = Field(
+        nullable=False,
+        sa_column_kwargs={'server_default': text('CURRENT_TIMESTAMP')})
     ip_address: str = Field(index=True)
     label: str = Field(unique=True)
     comment: typing.Optional[str]

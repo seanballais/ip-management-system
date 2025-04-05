@@ -167,7 +167,8 @@ function MainPage(): React.ReactNode {
                     (tabBarState.activeTabIndex == 0)
                         ? <IPAddressPanel
                             ipAddressTableState={ipAddressTableState}
-                            setIPAddressTableState={setIPAddressTableState}/>
+                            setIPAddressTableState={setIPAddressTableState}
+                            addIPAddressFormCallback={fetchIPAddressTableData}/>
                         : <AuditLogPanel userAuditLogState={userAuditLogState}
                                          ipAuditLogState={ipAuditLogState}
                                          setUserAuditLogState={setUserAuditLogState}
