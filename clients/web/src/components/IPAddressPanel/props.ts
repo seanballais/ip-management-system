@@ -4,11 +4,13 @@ import {CallbackFunc} from "../../utils/types.ts";
 
 interface IPAddressPanelProps {
     addIPAddressFormCallback: CallbackFunc;
+    editIPAddressTableRowCallback: CallbackFunc;
     ipAddressTableState: IPAddressDataState;
     setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }
 
 interface IPAddressTableProps {
+    editIPAddressTableRowCallback: CallbackFunc;
     ipAddressTableState: IPAddressDataState;
     setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }

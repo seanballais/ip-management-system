@@ -5,6 +5,7 @@ import {IPAddressPanelProps} from "./props.ts";
 
 function IPAddressPanel({
                             addIPAddressFormCallback,
+                            editIPAddressTableRowCallback,
                             ipAddressTableState,
                             setIPAddressTableState
                         }: IPAddressPanelProps): React.ReactNode {
@@ -12,7 +13,8 @@ function IPAddressPanel({
         <div>
             <AddIPAddressForm callback={addIPAddressFormCallback}/>
             <IPAddressTable ipAddressTableState={ipAddressTableState}
-                            setIPAddressTableState={setIPAddressTableState}/>
+                            setIPAddressTableState={setIPAddressTableState}
+                            editIPAddressTableRowCallback={editIPAddressTableRowCallback}/>
         </div>
     );
 }

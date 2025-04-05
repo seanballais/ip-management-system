@@ -14,6 +14,7 @@ import {
     FormInputMessage,
     FormInputMessageType
 } from "../FormInputMessage/FormInputMessage.tsx";
+import {CallbackFunc} from "../../utils/types.ts";
 
 interface TableState {
     isLoadingData: boolean;
@@ -22,7 +23,8 @@ interface TableState {
 
 function IPAddressTable({
                             ipAddressTableState,
-                            setIPAddressTableState
+                            setIPAddressTableState,
+                            editIPAddressTableRowCallback
                         }: IPAddressTableProps): React.ReactNode {
     const tableRef = useRef<HTMLDivElement>(null);
 
@@ -122,7 +124,8 @@ function IPAddressTable({
                 </thead>
                 <tbody>
                 <IPAddressTableRows parentState={state}
-                                    dataState={ipAddressTableState}/>
+                                    dataState={ipAddressTableState}
+                                    rowEditCallback={editIPAddressTableRowCallback}/>
                 </tbody>
             </table>
             <div className='row pagination-row'>
@@ -145,11 +148,13 @@ function IPAddressTable({
 interface IPAddressTableRowsState {
     parentState: TableState;
     dataState: IPAddressDataState;
+    rowEditCallback: CallbackFunc;
 }
 
 function IPAddressTableRows({
                                 parentState,
-                                dataState
+                                dataState,
+                                rowEditCallback
                             }: IPAddressTableRowsState): React.ReactNode {
     if (dataState.ips.length === 0) {
         if (parentState.isLoadingData) {
@@ -171,7 +176,8 @@ function IPAddressTableRows({
         dataState.ips.map((ip: IP): React.ReactNode => (
             <IPAddressTableRow key={ip.id} id={ip.id} ipAddress={ip.ip_address}
                                label={ip.label} comment={ip.comment}
-                               recorderUsername={ip.recorder.username}/>
+                               recorderUsername={ip.recorder.username}
+                               rowEditCallback={rowEditCallback}/>
         ))
     );
 }
@@ -182,6 +188,7 @@ interface RowProps {
     label: string;
     comment: string;
     recorderUsername: string
+    rowEditCallback: CallbackFunc
 }
 
 enum RowMode {
@@ -206,7 +213,8 @@ function IPAddressTableRow({
                                id,
                                ipAddress,
                                label,
-                               comment, recorderUsername
+                               comment, recorderUsername,
+                               rowEditCallback
                            }: RowProps): React.ReactNode {
     const ipAddressInputRef = useRef<HTMLInputElement>(null);
     const labelInputRef = useRef<HTMLInputElement>(null);
@@ -280,6 +288,7 @@ function IPAddressTableRow({
                     comment: commentValue,
                 }));
                 switchRowMode();
+                rowEditCallback();
             } else {
                 const {detail}: FailedJSONResponse = await response.json();
 

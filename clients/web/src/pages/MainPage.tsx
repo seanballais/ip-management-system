@@ -64,6 +64,12 @@ function MainPage(): React.ReactNode {
         }
     }
 
+    async function refetchAuditLogOnTableEdit(): Promise<void> {
+        if (userData.is_superuser) {
+            await fetchAuditLogData();
+        }
+    }
+
     async function fetchIPAddressTableData(): Promise<void> {
         await fetchIPAddressData(MAX_NUM_ITEMS_PER_PAGE, 0)
             .then(async (response: Response): Promise<IPAddressDataJSONResponse> => {
@@ -168,7 +174,8 @@ function MainPage(): React.ReactNode {
                         ? <IPAddressPanel
                             ipAddressTableState={ipAddressTableState}
                             setIPAddressTableState={setIPAddressTableState}
-                            addIPAddressFormCallback={fetchIPAddressTableData}/>
+                            addIPAddressFormCallback={fetchData}
+                            editIPAddressTableRowCallback={refetchAuditLogOnTableEdit}/>
                         : <AuditLogPanel userAuditLogState={userAuditLogState}
                                          ipAuditLogState={ipAuditLogState}
                                          setUserAuditLogState={setUserAuditLogState}
