@@ -123,7 +123,7 @@ function AddIPAddressForm(): React.ReactNode {
         <div
             className='form-container add-ip-address-form-container no-padding'>
             <form className='add-ip row' onSubmit={handleAddIPAddress}>
-                <div className='form-group padding-1-rem column'>
+                <div className='form-group padding-1rem column'>
                     <label htmlFor='ipAddress'>IP Address</label>
                     <input ref={ipAddressInput}
                            type='text' placeholder='IP Address'
@@ -138,7 +138,7 @@ function AddIPAddressForm(): React.ReactNode {
                                       type={FormInputMessageType.Error}
                                       message={formData.ipAddressErrorMessage}/>
                 </div>
-                <div className='form-group padding-1-rem column'>
+                <div className='form-group padding-1rem column'>
                     <label htmlFor='label'>Label</label>
                     <input ref={labelInput}
                            type='text' placeholder='Label' name='label'
@@ -149,7 +149,7 @@ function AddIPAddressForm(): React.ReactNode {
                                       type={FormInputMessageType.Error}
                                       message={formData.labelErrorMessage}/>
                 </div>
-                <div className='form-group padding-1-rem column'>
+                <div className='form-group padding-1rem column'>
                     <label htmlFor='comment'>Comment</label>
                     <input ref={commentInput}
                            type='text'
@@ -157,7 +157,7 @@ function AddIPAddressForm(): React.ReactNode {
                            onChange={handleChange}
                            disabled={!formData.isCommentInputEnabled}/>
                 </div>
-                <div className='form-group padding-1-rem column'>
+                <div className='form-group padding-1rem column'>
                     <button type='submit'
                             disabled={!formData.isSubmitButtonEnabled}>Add IP
                         Address

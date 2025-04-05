@@ -146,6 +146,27 @@ async function fetchIPAuditLogData(numItemsPerPage: number, pageNumber: number):
     }
 }
 
+async function updateIPAddressData(id: number, ipAddress: string | null, label: string | null, comment: string | null): Promise<Response> {
+    let bodyData: GenericBodyData = {};
+    if (ipAddress) {
+        bodyData['ip_address'] = ipAddress;
+    }
+
+    if (label) {
+        bodyData['label'] = label;
+    }
+
+    if (comment) {
+        bodyData['comment'] = comment;
+    }
+
+    try {
+        return await patchWithTokenRefresh(`/ips/${id}`, bodyData);
+    } catch (e: unknown) {
+        throw e as Error;
+    }
+}
+
 async function postWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
     const response: Response = await postWithAccessToken(path, body, queryParams);
     if (response.ok) {
@@ -157,6 +178,8 @@ async function postWithTokenRefresh(path: string, body: GenericBodyData, queryPa
     const {detail}: FailedJSONResponse = await response.json();
     if (detail.errors[0].code === 'invalid_access_token') {
         // Refresh tokens.
+        console.log('Access token is invalid. Refreshing tokens before resending post.')
+
         try {
             await refreshTokens();
         } catch (error: unknown) {
@@ -169,7 +192,37 @@ async function postWithTokenRefresh(path: string, body: GenericBodyData, queryPa
     }
 
     // Retry the original operation.
+    console.log('Tokens refreshed. Resending post.')
     return postWithAccessToken(path, body, queryParams);
+}
+
+async function patchWithTokenRefresh(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const response: Response = await patchWithAccessToken(path, body, queryParams);
+    if (response.ok) {
+        return response;
+    }
+
+    // Check first if the error is about an invalid access token.
+    const origResponse: Response = response.clone();
+    const {detail}: FailedJSONResponse = await response.json();
+    if (detail.errors[0].code === 'invalid_access_token') {
+        // Refresh tokens.
+        console.log('Access token is invalid. Refreshing tokens before resending patch.')
+
+        try {
+            await refreshTokens();
+        } catch (error: unknown) {
+            // The tokens are likely to no longer be valid.
+            throw error as Error;
+        }
+    } else {
+        // Error is something else. Just return the response.
+        return origResponse;
+    }
+
+    // Retry the original operation.
+    console.log('Tokens refreshed. Resending patch.')
+    return patchWithAccessToken(path, body, queryParams);
 }
 
 async function refreshTokens(): Promise<void> {
@@ -199,8 +252,14 @@ async function postWithAccessToken(path: string, body: GenericBodyData, queryPar
     return post(path, bodyData, queryParams);
 }
 
-async function get(path: string, queryParams: QueryParameters | null = null): Promise<Response> {
-    return fetchAPI(path, HTTPMethod.GET, null, queryParams);
+async function patchWithAccessToken(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
+    const bodyData: GenericBodyData = {
+        ...body,
+        access_token: accessToken
+    };
+
+    return patch(path, bodyData, queryParams);
 }
 
 async function post(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
@@ -209,6 +268,10 @@ async function post(path: string, body: GenericBodyData, queryParams: QueryParam
 
 async function put(path: string, body: string, queryParams: QueryParameters | null = null): Promise<Response> {
     return fetchAPI(path, HTTPMethod.PUT, body, queryParams);
+}
+
+async function patch(path: string, body: GenericBodyData, queryParams: QueryParameters | null = null): Promise<Response> {
+    return fetchAPI(path, HTTPMethod.PATCH, JSON.stringify(body), queryParams);
 }
 
 async function fetchAPI(path: string, method: HTTPMethod, body: string | null, queryParams: QueryParameters | null = null): Promise<Response> {
@@ -233,6 +296,7 @@ export {
     fetchIPAddressData,
     fetchIPAuditLogData,
     fetchUserAuditLogData,
+    updateIPAddressData,
     postWithTokenRefresh,
     post,
     put

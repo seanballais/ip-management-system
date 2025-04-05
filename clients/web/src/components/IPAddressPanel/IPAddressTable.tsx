@@ -1,14 +1,19 @@
 import * as React from 'react';
 import {useRef, useState} from "react";
 import {
+    MAX_NUM_ITEMS_PER_PAGE,
     FailedJSONResponse,
     fetchIPAddressData,
-    IP, IPAddressData, IPAddressDataJSONResponse,
-    MAX_NUM_ITEMS_PER_PAGE
+    updateIPAddressData,
+    IP, IPAddressData, IPAddressDataJSONResponse
 } from "../../utils/api.ts";
 import IPAddressDataState from './IPAddressDataState.tsx';
 import {IPAddressTableProps} from "./props.ts";
 import {clearTokens} from "../../utils/tokens.ts";
+import {
+    FormInputMessage,
+    FormInputMessageType
+} from "../FormInputMessage/FormInputMessage.tsx";
 
 interface TableState {
     isLoadingData: boolean;
@@ -188,7 +193,13 @@ interface RowState {
     ipAddress: string,
     label: string;
     comment: string;
-    mode: RowMode
+    mode: RowMode;
+    ipAddressErrorMessage?: string;
+    labelErrorMessage?: string;
+    isIPAddressInputEnabled: boolean;
+    isLabelInputEnabled: boolean;
+    isCommentInputEnabled: boolean;
+    areButtonsEnabled: boolean;
 }
 
 function IPAddressTableRow({
@@ -197,12 +208,87 @@ function IPAddressTableRow({
                                label,
                                comment, recorderUsername
                            }: RowProps): React.ReactNode {
+    const ipAddressInputRef = useRef<HTMLInputElement>(null);
+    const labelInputRef = useRef<HTMLInputElement>(null);
+    const commentInputRef = useRef<HTMLInputElement>(null);
+
     const [rowState, setRowState] = useState<RowState>({
         ipAddress: ipAddress,
         label: label,
         comment: comment,
-        mode: RowMode.VIEWING
+        mode: RowMode.VIEWING,
+        isIPAddressInputEnabled: true,
+        isLabelInputEnabled: true,
+        isCommentInputEnabled: true,
+        areButtonsEnabled: true
     });
+
+    async function handleUpdateIPAddress(): Promise<void> {
+        setRowState((data: RowState): RowState => ({
+            ...data,
+            ipAddressErrorMessage: undefined,
+            labelErrorMessage: undefined,
+            isIPAddressInputEnabled: false,
+            isLabelInputEnabled: false,
+            isCommentInputEnabled: false,
+            areButtonsEnabled: false
+        }));
+
+        let ipAddressValue: string;
+        if (ipAddressInputRef.current) {
+            ipAddressValue = ipAddressInputRef.current.value;
+        } else {
+            ipAddressValue = rowState.ipAddress;
+        }
+
+        let labelValue: string;
+        if (labelInputRef.current) {
+            labelValue = labelInputRef.current.value;
+        } else {
+            labelValue = rowState.label;
+        }
+
+        let commentValue: string;
+        if (commentInputRef.current) {
+            commentValue = commentInputRef.current.value;
+        } else {
+            commentValue = rowState.comment;
+        }
+
+        const response: Response = await updateIPAddressData(id, ipAddressValue, labelValue, commentValue);
+        if (response.ok) {
+            setRowState((data: RowState): RowState => ({
+                ...data,
+                ipAddress: ipAddressValue,
+                label: labelValue,
+                comment: commentValue,
+            }));
+            switchRowMode();
+        } else {
+            const {detail}: FailedJSONResponse = await response.json();
+
+            // We already know that there is one error that is returned.
+            if (detail.errors[0].code === 'invalid_ip_address') {
+                setRowState((data: RowState): RowState => ({
+                    ...data,
+                    ipAddressErrorMessage: 'Invalid IP address.'
+                }));
+            } else if (detail.errors[0].code === 'unavailable_label') {
+                setRowState((data: RowState): RowState => ({
+                    ...data,
+                    labelErrorMessage: 'Label is already used.'
+                }));
+            }
+        }
+
+        setRowState((data: RowState): RowState => ({
+            ...data,
+            isIPAddressInputEnabled: true,
+            isLabelInputEnabled: true,
+            isCommentInputEnabled: true,
+            areButtonsEnabled: true
+        }));
+    }
 
     function switchRowMode(): void {
         if (rowState.mode === RowMode.VIEWING) {
@@ -235,23 +321,45 @@ function IPAddressTableRow({
                     ) : (
                         <>
                             <td>
-                                <input type='text' placeholder='IP Address'
-                                       name='ipAddress'
-                                       value={rowState.ipAddress}/>
+                                <div className='form-group'>
+                                    <input ref={ipAddressInputRef}
+                                           type='text' placeholder='IP Address'
+                                           name='ipAddress'
+                                           defaultValue={rowState.ipAddress}
+                                           disabled={!rowState.isIPAddressInputEnabled}/>
+                                    <FormInputMessage targetInput='ipAddress'
+                                                      type={FormInputMessageType.Error}
+                                                      message={rowState.ipAddressErrorMessage}/>
+                                </div>
                             </td>
                             <td>
-                                <input type='text' placeholder='Label'
-                                       name='label'
-                                       value={rowState.label}/>
+                                <div className='form-group'>
+                                    <input ref={labelInputRef}
+                                           type='text' placeholder='Label'
+                                           name='label'
+                                           defaultValue={rowState.label}
+                                           disabled={!rowState.isLabelInputEnabled}/>
+                                    <FormInputMessage targetInput='label'
+                                                      type={FormInputMessageType.Error}
+                                                      message={rowState.labelErrorMessage}/>
+                                </div>
                             </td>
                             <td>
-                                <input type='text' placeholder='Comment'
+                                <input ref={commentInputRef}
+                                       type='text' placeholder='Comment'
                                        name='comment'
-                                       value={rowState.comment}/>
+                                       defaultValue={rowState.comment}
+                                       disabled={!rowState.isCommentInputEnabled}/>
                             </td>
                             <th scope='row'>@{recorderUsername}</th>
                             <td>
-                                <button onClick={switchRowMode}>Cancel</button>
+                                <button className='margin-right-1rem'
+                                        disabled={!rowState.areButtonsEnabled}
+                                        onClick={handleUpdateIPAddress}>Save
+                                </button>
+                                <button disabled={!rowState.areButtonsEnabled}
+                                        onClick={switchRowMode}>Cancel
+                                </button>
                             </td>
                         </>
                     )

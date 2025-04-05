@@ -189,13 +189,6 @@ form {
 
     font-size: 1rem;
 
-    div.form-group {
-        display: flex;
-        flex-direction: column;
-
-        margin-bottom: 1rem;
-    }
-
     &.row {
         div.form-group {
             &:first-child {
@@ -207,6 +200,13 @@ form {
             }
         }
     }
+}
+
+div.form-group {
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 1rem;
 }
 
 label {
@@ -301,6 +301,11 @@ table, th, td {
     font-weight: 700;
 }
 
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
 .align-right {
     align-items: end;
 }
@@ -317,7 +322,11 @@ table, th, td {
     margin-top: 32px !important;
 }
 
-.padding-1-rem {
+.margin-right-1rem {
+    margin-right: 1rem !important;
+}
+
+.padding-1rem {
     padding: 1rem !important;
 }
 
