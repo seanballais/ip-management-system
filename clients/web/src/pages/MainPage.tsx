@@ -172,6 +172,7 @@ function MainPage(): React.ReactNode {
                 {
                     (tabBarState.activeTabIndex == 0)
                         ? <IPAddressPanel
+                            user={userData}
                             ipAddressTableState={ipAddressTableState}
                             setIPAddressTableState={setIPAddressTableState}
                             addIPAddressFormCallback={fetchData}

@@ -4,6 +4,7 @@ import IPAddressTable from "./IPAddressTable.tsx";
 import {IPAddressPanelProps} from "./props.ts";
 
 function IPAddressPanel({
+                            user,
                             addIPAddressFormCallback,
                             editIPAddressTableRowCallback,
                             ipAddressTableState,
@@ -12,7 +13,8 @@ function IPAddressPanel({
     return (
         <div>
             <AddIPAddressForm callback={addIPAddressFormCallback}/>
-            <IPAddressTable ipAddressTableState={ipAddressTableState}
+            <IPAddressTable user={user}
+                            ipAddressTableState={ipAddressTableState}
                             setIPAddressTableState={setIPAddressTableState}
                             editIPAddressTableRowCallback={editIPAddressTableRowCallback}/>
         </div>

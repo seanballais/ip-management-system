@@ -5,7 +5,7 @@ import {
     FailedJSONResponse,
     fetchIPAddressData,
     updateIPAddressData,
-    IP, IPAddressData, IPAddressDataJSONResponse
+    IP, IPAddressData, IPAddressDataJSONResponse, User
 } from "../../utils/api.ts";
 import IPAddressDataState from './IPAddressDataState.tsx';
 import {IPAddressTableProps} from "./props.ts";
@@ -22,6 +22,7 @@ interface TableState {
 }
 
 function IPAddressTable({
+                            user,
                             ipAddressTableState,
                             setIPAddressTableState,
                             editIPAddressTableRowCallback
@@ -125,6 +126,7 @@ function IPAddressTable({
                 <tbody>
                 <IPAddressTableRows parentState={state}
                                     dataState={ipAddressTableState}
+                                    user={user}
                                     rowEditCallback={editIPAddressTableRowCallback}/>
                 </tbody>
             </table>
@@ -146,12 +148,14 @@ function IPAddressTable({
 }
 
 interface IPAddressTableRowsState {
+    user: User;
     parentState: TableState;
     dataState: IPAddressDataState;
     rowEditCallback: CallbackFunc;
 }
 
 function IPAddressTableRows({
+                                user,
                                 parentState,
                                 dataState,
                                 rowEditCallback
@@ -177,6 +181,7 @@ function IPAddressTableRows({
             <IPAddressTableRow key={ip.id} id={ip.id} ipAddress={ip.ip_address}
                                label={ip.label} comment={ip.comment}
                                recorderUsername={ip.recorder.username}
+                               user={user}
                                rowEditCallback={rowEditCallback}/>
         ))
     );
@@ -188,6 +193,7 @@ interface RowProps {
     label: string;
     comment: string;
     recorderUsername: string
+    user: User;
     rowEditCallback: CallbackFunc
 }
 
@@ -214,6 +220,7 @@ function IPAddressTableRow({
                                ipAddress,
                                label,
                                comment, recorderUsername,
+                               user,
                                rowEditCallback
                            }: RowProps): React.ReactNode {
     const ipAddressInputRef = useRef<HTMLInputElement>(null);
@@ -343,7 +350,14 @@ function IPAddressTableRow({
                             <td>{rowState.comment}</td>
                             <th scope='row'>@{recorderUsername}</th>
                             <td>
-                                <button onClick={switchRowMode}>Edit</button>
+                                <button className='margin-right-1rem'
+                                        onClick={switchRowMode}>Edit
+                                </button>
+                                {
+                                    (user.is_superuser)
+                                        ? <button>Delete</button>
+                                        : null
+                                }
                             </td>
                         </>
                     ) : (
