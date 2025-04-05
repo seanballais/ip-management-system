@@ -31,7 +31,7 @@ function MainPage(): React.ReactNode {
     const userData: User = getUserDataFromToken(accessToken);
 
     useEffect((): void => {
-        fetchAuditLogData();
+        void fetchAuditLogData();
     }, []);
 
     async function fetchAuditLogData(): Promise<void> {
@@ -55,7 +55,7 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((e: unknown): void => {
+            .catch((): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
@@ -81,7 +81,7 @@ function MainPage(): React.ReactNode {
                     events: data.events
                 }));
             })
-            .catch((e: unknown): void => {
+            .catch((): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
                 clearTokens();
