@@ -42,7 +42,9 @@ function MainPage(): React.ReactNode {
     });
 
     useEffect((): void => {
-        void fetchAuditLogData();
+        if (userData.is_superuser) {
+            void fetchAuditLogData();
+        }
     }, []);
 
     async function fetchAuditLogData(): Promise<void> {

@@ -25,6 +25,7 @@ function TabBar({tabBarState, setTabBarState}: TabBarProps): React.ReactNode {
 
                     return (
                         <button
+                            key={`tab-bar-${index}`}
                             className={isActiveTab ? 'tab-bar-button active' : 'tab-bar-button'}
                             onClick={(): void => {
                                 changeTab(index);
