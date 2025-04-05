@@ -112,6 +112,7 @@ function IPEventsAuditLog({
                 <tr>
                     <th scope='col'>Recorded On (UTC)</th>
                     <th scope='col'>IP Address</th>
+                    <th scope='col'>Label</th>
                     <th scope='col'>Event</th>
                     <th scope='col'>User Responsible</th>
                 </tr>
@@ -146,33 +147,30 @@ function IPAuditLogRows({
         if (parentState.isLoadingData) {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={4}>Loading data...</td>
+                    <td colSpan={5}>Loading data...</td>
                 </tr>
             );
         } else {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={4}>No user event logged.</td>
+                    <td colSpan={5}>No user event logged.</td>
                 </tr>
             );
         }
     }
 
     return (
-        dataState.events.map((event: IPEvent): React.ReactNode => {
-
-
-            return (
-                <tr key={event.id}>
-                    <td>{event.recorded_on}</td>
-                    <td>{event.ip.ip_address}</td>
-                    <td>
-                        <EventCellData event={event}/>
-                    </td>
-                    <th scope='row'>@{event.trigger_user.username}</th>
-                </tr>
-            );
-        })
+        dataState.events.map((event: IPEvent): React.ReactNode => (
+            <tr key={event.id}>
+                <td>{event.recorded_on}</td>
+                <td>{event.ip.ip_address}</td>
+                <td>{event.ip.label}</td>
+                <td>
+                    <EventCellData event={event}/>
+                </td>
+                <th scope='row'>@{event.trigger_user.username}</th>
+            </tr>
+        ))
     );
 }
 
