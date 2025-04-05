@@ -221,7 +221,7 @@ button {
 
     cursor: pointer;
 
-    &:active {
+    &:active, &.active {
         box-shadow: none;
         transform: translateY(var(--ui-z-axis-offset));
     }

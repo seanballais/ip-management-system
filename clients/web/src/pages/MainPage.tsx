@@ -16,8 +16,22 @@ import {
 import AuditLogPanel from "../components/AuditLog/AuditLogPanel.tsx";
 import {UserAuditLogState} from "../interfaces.ts";
 import IPAuditLogState from "../components/AuditLog/IPAuditLogState.ts";
+import {TabBar} from "../components.tsx";
+import TabBarState from "../components/TabBar/TabBarState.ts";
 
 function MainPage(): React.ReactNode {
+    const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
+    const userData: User = getUserDataFromToken(accessToken);
+
+    let tabNames: Array<string> = ['IP Addresses'];
+    if (userData.is_superuser) {
+        tabNames.push('Audit Log');
+    }
+    const [tabBarState, setTabBarState] = useState<TabBarState>({
+        tabNames: tabNames,
+        activeTabIndex: 0
+    });
+
     const [userAuditLogState, setUserAuditLogState] = useState<UserAuditLogState>({
         pageNumber: 0,
         events: []
@@ -26,9 +40,6 @@ function MainPage(): React.ReactNode {
         pageNumber: 0,
         events: []
     });
-
-    const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
-    const userData: User = getUserDataFromToken(accessToken);
 
     useEffect((): void => {
         void fetchAuditLogData();
@@ -102,6 +113,8 @@ function MainPage(): React.ReactNode {
                 </div>
             </header>
             <section className='container'>
+                <TabBar tabBarState={tabBarState}
+                        setTabBarState={setTabBarState}/>
                 <AuditLogPanel userAuditLogState={userAuditLogState}
                                ipAuditLogState={ipAuditLogState}
                                setUserAuditLogState={setUserAuditLogState}
