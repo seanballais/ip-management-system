@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {IPEventsPanelProps} from "./props.ts";
 import {
     FailedJSONResponse, fetchIPAuditLogData, IPAuditLog,
@@ -23,6 +23,8 @@ interface IPAuditLogRowsState {
 function IPEventsAuditLog({
                               ipAuditLogState, setIPAuditLogState
                           }: IPEventsPanelProps): React.ReactNode {
+    const logRef = useRef<HTMLDivElement>(null);
+
     const numPages: number = Math.ceil((ipAuditLogState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
     let [state, setState] = useState<LogState>({
         isLoadingData: false,
@@ -54,6 +56,8 @@ function IPEventsAuditLog({
     }
 
     function getPage(pageNumber: number) {
+        logRef.current?.scrollIntoView();
+
         setState((state: LogState): LogState => ({
             ...state,
             isLoadingData: true,
@@ -132,7 +136,8 @@ function IPEventsAuditLog({
     }
 
     return (
-        <div className='panel-audit-log margin-top-32px max-width-initial'>
+        <div className='panel-audit-log margin-top-32px max-width-initial'
+             ref={logRef}>
             <h1>IP Address Events</h1>
             <table>
                 <thead>

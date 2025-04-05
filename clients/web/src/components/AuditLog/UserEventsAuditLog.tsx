@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {
     FailedJSONResponse,
     fetchUserAuditLogData,
@@ -25,6 +25,8 @@ function UserEventsAuditLog({
                                 userAuditLogState,
                                 setUserAuditLogState
                             }: UserEventsPanelProps): React.ReactNode {
+    const logRef = useRef<HTMLDivElement>(null);
+
     const numPages: number = Math.ceil((userAuditLogState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
     let [state, setState] = useState<LogState>({
         isLoadingData: false,
@@ -56,6 +58,8 @@ function UserEventsAuditLog({
     }
 
     function getPage(pageNumber: number) {
+        logRef.current?.scrollIntoView();
+
         setState((state: LogState): LogState => ({
             ...state,
             isLoadingData: true,
@@ -134,7 +138,7 @@ function UserEventsAuditLog({
     }
 
     return (
-        <div className='panel-audit-log'>
+        <div className='panel-audit-log' ref={logRef}>
             <h1>User Events</h1>
             <table>
                 <thead>
