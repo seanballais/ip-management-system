@@ -1,15 +1,12 @@
 import * as React from 'react';
 import AddIPAddressForm from "./AddIPAddressForm.tsx";
-import {IPAddressTable} from "./IPAddressTable.tsx";
-import {useState} from "react";
-import IPAddressDataState from "./IPAddressDataState.tsx";
+import IPAddressTable from "./IPAddressTable.tsx";
+import {IPAddressTableProps} from "./props.ts";
 
-function IPAddressPanel(): React.ReactNode {
-    const [ipAddressTableState, setIPAddressTableState] = useState<IPAddressDataState>({
-        pageNumber: 0,
-        ips: []
-    });
-
+function IPAddressPanel({
+                            ipAddressTableState,
+                            setIPAddressTableState
+                        }: IPAddressTableProps): React.ReactNode {
     return (
         <div>
             <AddIPAddressForm/>

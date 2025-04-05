@@ -115,7 +115,11 @@ async function fetchIPAddressData(numItemsPerPage: number, pageNumber: number): 
         items_per_page: numItemsPerPage,
         page_number: pageNumber
     };
-    return get('/ips', queryParams);
+    try {
+        return await postWithTokenRefresh('/ips-data', {}, queryParams);
+    } catch (e: unknown) {
+        throw e as Error;
+    }
 }
 
 async function fetchUserAuditLogData(numItemsPerPage: number, pageNumber: number): Promise<Response> {

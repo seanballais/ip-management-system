@@ -4,8 +4,6 @@ import MainPage from "./pages/MainPage.tsx";
 
 function App() {
     const accessToken: string | null = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME);
-    // const refreshToken: string | null = localStorage.getItem(REFRESH_TOKEN_STORAGE_NAME);
-
     if (accessToken) {
         return <MainPage/>
     } else {

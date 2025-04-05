@@ -7,15 +7,12 @@ import {
     MAX_NUM_ITEMS_PER_PAGE
 } from "../../utils/api.ts";
 import IPAddressDataState from './IPAddressDataState.tsx';
+import {IPAddressTableProps} from "./props.ts";
+import {clearTokens} from "../../utils/tokens.ts";
 
 interface TableState {
     isLoadingData: boolean;
     areButtonsEnabled: boolean
-}
-
-interface IPAddressTableProps {
-    ipAddressTableState: IPAddressDataState;
-    setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }
 
 function IPAddressTable({
@@ -95,10 +92,11 @@ function IPAddressTable({
                     areButtonsEnabled: true
                 }));
             })
-            .catch((e: unknown): void => {
+            .catch((): void => {
                 // Tokens are already invalid, so we need to remove the tokens
                 // in storage. We reload so that we are back in the login page.
-                console.error(e as Error);
+                clearTokens();
+                window.location.reload();
             });
     }
 
@@ -173,11 +171,12 @@ function IPAddressTableRows({
                 <td>{ip.label}</td>
                 <td>{ip.comment}</td>
                 <th scope='row'>@{ip.recorder.username}</th>
-                <td></td>
+                <td>
+                    <button>Edit</button>
+                </td>
             </tr>
         ))
     );
 }
 
-export {IPAddressTable};
-export type {IPAddressDataState};
+export default IPAddressTable;

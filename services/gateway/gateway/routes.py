@@ -212,7 +212,7 @@ async def delete_ip_address(ip_address_id: int, data: DeleteIPAddressData,
     return resp.json()
 
 
-@router.get('/ips')
+@router.post('/ips-data')
 async def get_ip_addresses(data: GetIPAddressData, response: Response,
                            items_per_page: Annotated[int, Query(le=50)] = 10,
                            page_number: Annotated[int, Query()] = 0) -> dict:

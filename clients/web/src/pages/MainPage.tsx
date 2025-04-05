@@ -2,8 +2,13 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import LogoutLink from "../components/LogoutLink/LogoutLink.tsx";
 import {
-    FailedJSONResponse, fetchIPAuditLogData,
-    fetchUserAuditLogData, IPAuditLog, IPAuditLogJSONResponse,
+    FailedJSONResponse,
+    fetchIPAddressData,
+    fetchIPAuditLogData,
+    fetchUserAuditLogData, IPAddressData,
+    IPAddressDataJSONResponse,
+    IPAuditLog,
+    IPAuditLogJSONResponse,
     MAX_NUM_ITEMS_PER_PAGE,
     User,
     UserAuditLog,
@@ -18,6 +23,8 @@ import {UserAuditLogState} from "../interfaces.ts";
 import IPAuditLogState from "../components/AuditLog/IPAuditLogState.ts";
 import {IPAddressPanel, TabBar} from "../components.tsx";
 import TabBarState from "../components/TabBar/TabBarState.ts";
+import IPAddressDataState
+    from "../components/IPAddressPanel/IPAddressDataState.tsx";
 
 function MainPage(): React.ReactNode {
     const accessToken: string = localStorage.getItem(ACCESS_TOKEN_STORAGE_NAME) ?? '';
@@ -32,6 +39,10 @@ function MainPage(): React.ReactNode {
         activeTabIndex: 0
     });
 
+    const [ipAddressTableState, setIPAddressTableState] = useState<IPAddressDataState>({
+        pageNumber: 0,
+        ips: []
+    });
     const [userAuditLogState, setUserAuditLogState] = useState<UserAuditLogState>({
         pageNumber: 0,
         events: []
@@ -42,10 +53,45 @@ function MainPage(): React.ReactNode {
     });
 
     useEffect((): void => {
-        if (userData.is_superuser) {
-            void fetchAuditLogData();
-        }
+        void fetchData();
     }, []);
+
+    async function fetchData(): Promise<void> {
+        await fetchIPAddressTableData();
+
+        if (userData.is_superuser) {
+            await fetchAuditLogData();
+        }
+    }
+
+    async function fetchIPAddressTableData(): Promise<void> {
+        await fetchIPAddressData(MAX_NUM_ITEMS_PER_PAGE, 0)
+            .then(async (response: Response): Promise<IPAddressDataJSONResponse> => {
+                if (response.ok) {
+                    return await response.json();
+                }
+
+                const {detail}: FailedJSONResponse = await response.json();
+                const errorCode: string = detail.errors[0].code;
+                throw new Error(`Error code: ${errorCode}`);
+            })
+            .then((responseData: IPAddressDataJSONResponse): void => {
+                const data: IPAddressData = responseData.data;
+                setIPAddressTableState((state: IPAddressDataState): IPAddressDataState => ({
+                    ...state,
+                    numTotalItems: data.num_total_items,
+                    numItemsInPage: data.count,
+                    pageNumber: data.page_number,
+                    ips: data.ips
+                }));
+            })
+            .catch((): void => {
+                // Tokens are already invalid, so we need to remove the tokens
+                // in storage. We reload so that we are back in the login page.
+                clearTokens();
+                window.location.reload();
+            });
+    }
 
     async function fetchAuditLogData(): Promise<void> {
         await fetchUserAuditLogData(MAX_NUM_ITEMS_PER_PAGE, 0)
@@ -119,7 +165,9 @@ function MainPage(): React.ReactNode {
                         setTabBarState={setTabBarState}/>
                 {
                     (tabBarState.activeTabIndex == 0)
-                        ? <IPAddressPanel/>
+                        ? <IPAddressPanel
+                            ipAddressTableState={ipAddressTableState}
+                            setIPAddressTableState={setIPAddressTableState}/>
                         : <AuditLogPanel userAuditLogState={userAuditLogState}
                                          ipAuditLogState={ipAuditLogState}
                                          setUserAuditLogState={setUserAuditLogState}
