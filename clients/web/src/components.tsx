@@ -1,3 +1,4 @@
+import IPAddressPanel from "./components/IPAddressPanel/IPAddressPanel.tsx";
 import Login from "./components/Login/Login.tsx";
 import Registration from "./components/Registration/Registration.tsx";
 import {
@@ -7,5 +8,12 @@ import {
 import TabBar from "./components/TabBar/TabBar.tsx";
 import TabBarState from "./components/TabBar/TabBarState.ts";
 
-export {Login, Registration, FormMessage, TabBar, FormMessageType};
+export {
+    IPAddressPanel,
+    Login,
+    Registration,
+    FormMessage,
+    TabBar,
+    FormMessageType
+};
 export type {TabBarState};

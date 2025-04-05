@@ -16,7 +16,7 @@ import {
 import AuditLogPanel from "../components/AuditLog/AuditLogPanel.tsx";
 import {UserAuditLogState} from "../interfaces.ts";
 import IPAuditLogState from "../components/AuditLog/IPAuditLogState.ts";
-import {TabBar} from "../components.tsx";
+import {IPAddressPanel, TabBar} from "../components.tsx";
 import TabBarState from "../components/TabBar/TabBarState.ts";
 
 function MainPage(): React.ReactNode {
@@ -119,7 +119,7 @@ function MainPage(): React.ReactNode {
                         setTabBarState={setTabBarState}/>
                 {
                     (tabBarState.activeTabIndex == 0)
-                        ? <div>IP Addresses</div>
+                        ? <IPAddressPanel/>
                         : <AuditLogPanel userAuditLogState={userAuditLogState}
                                          ipAuditLogState={ipAuditLogState}
                                          setUserAuditLogState={setUserAuditLogState}
