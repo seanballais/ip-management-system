@@ -1,0 +1,7 @@
+div.add-ip-address-form-container {
+    max-width: initial;
+
+    button {
+        height: 100%;
+    }
+}

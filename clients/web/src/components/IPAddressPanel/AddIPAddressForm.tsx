@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {useState} from "react";
+import './IPAddressPanel.css';
 
 interface AddIPFormState {
     ipAddress?: string;
@@ -33,10 +34,9 @@ function AddIPAddressForm(): React.ReactNode {
     }
 
     return (
-        <div className='form-container'>
-            <h1>Login</h1>
-            <form className='add-ip'>
-                <div className='form-group'>
+        <div className='form-container add-ip-address-form-container'>
+            <form className='add-ip row'>
+                <div className='form-group column'>
                     <label htmlFor='ip-address'>IP Address</label>
                     <input type='text' placeholder='IP Address'
                            name='ip-address'
@@ -44,23 +44,26 @@ function AddIPAddressForm(): React.ReactNode {
                            disabled={!formData.isIPAddressInputEnabled}
                            required/>
                 </div>
-                <div className='form-group'>
+                <div className='form-group column'>
                     <label htmlFor='label'>Label</label>
                     <input type='text' placeholder='Label' name='label'
                            onChange={handleChange}
                            disabled={!formData.isLabelInputEnabled}
                            required/>
                 </div>
-                <div className='form-group'>
-                    <label htmlFor='comment'>comment</label>
-                    <textarea name='comment'
-                              onChange={handleChange}
-                              disabled={!formData.isCommentInputEnabled}></textarea>
+                <div className='form-group column'>
+                    <label htmlFor='comment'>Comment</label>
+                    <input type='text' placeholder='Comment' name='comment'
+                           onChange={handleChange}
+                           disabled={!formData.isCommentInputEnabled}
+                           required/>
                 </div>
-                <button type='submit'
-                        disabled={!formData.isSubmitButtonEnabled}>Add IP
-                    Address
-                </button>
+                <div className='form-group column'>
+                    <button type='submit'
+                            disabled={!formData.isSubmitButtonEnabled}>Add IP
+                        Address
+                    </button>
+                </div>
             </form>
         </div>
     );
