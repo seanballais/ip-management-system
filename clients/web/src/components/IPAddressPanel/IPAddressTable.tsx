@@ -286,66 +286,82 @@ function IPAddressTableRow({
             commentValue = rowState.comment;
         }
 
-        let ipAddressUpdateValue: string | null = null;
-        if (ipAddressValue != rowState.ipAddress) {
-            ipAddressUpdateValue = ipAddressValue;
-        }
-
-        let labelUpdateValue: string | null = null;
-        if (labelValue != rowState.label) {
-            labelUpdateValue = labelValue;
-        }
-
-        let commentUpdateValue: string | null = null;
-        if (commentValue != rowState.comment) {
-            commentUpdateValue = commentValue
-        }
-
-        if (ipAddressUpdateValue || labelUpdateValue || commentUpdateValue) {
-            const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
-            if (response.ok) {
+        if (!ipAddressValue || !labelValue) {
+            if (!ipAddressValue) {
                 setRowState((data: RowState): RowState => ({
                     ...data,
-                    ipAddress: ipAddressValue,
-                    label: labelValue,
-                    comment: commentValue,
+                    ipAddressErrorMessage: 'IP address must not be empty.'
                 }));
+            }
 
-                // Update the state in the main page.
-                setIPAddressTableState((state: IPAddressDataState): IPAddressDataState => ({
-                    ...state,
-                    ips: [
-                        ...state.ips.slice(0, index),
-                        {
-                            ...state.ips[index],
-                            ip_address: ipAddressValue,
-                            label: labelValue,
-                            comment: commentValue
-                        },
-                        ...state.ips.slice(index + 1)
-                    ]
+            if (!labelValue) {
+                setRowState((data: RowState): RowState => ({
+                    ...data,
+                    labelErrorMessage: 'Label must not be empty.'
                 }));
-
-                switchRowMode();
-                rowEditCallback();
-            } else {
-                const {detail}: FailedJSONResponse = await response.json();
-
-                // We already know that there is one error that is returned.
-                if (detail.errors[0].code === 'invalid_ip_address') {
-                    setRowState((data: RowState): RowState => ({
-                        ...data,
-                        ipAddressErrorMessage: 'Invalid IP address.'
-                    }));
-                } else if (detail.errors[0].code === 'unavailable_label') {
-                    setRowState((data: RowState): RowState => ({
-                        ...data,
-                        labelErrorMessage: 'Label is already used.'
-                    }));
-                }
             }
         } else {
-            switchRowMode();
+            let ipAddressUpdateValue: string | null = null;
+            if (ipAddressValue != rowState.ipAddress) {
+                ipAddressUpdateValue = ipAddressValue;
+            }
+
+            let labelUpdateValue: string | null = null;
+            if (labelValue != rowState.label) {
+                labelUpdateValue = labelValue;
+            }
+
+            let commentUpdateValue: string | null = null;
+            if (commentValue != rowState.comment) {
+                commentUpdateValue = commentValue
+            }
+
+            if (ipAddressUpdateValue || labelUpdateValue || commentUpdateValue) {
+                const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
+                if (response.ok) {
+                    setRowState((data: RowState): RowState => ({
+                        ...data,
+                        ipAddress: ipAddressValue,
+                        label: labelValue,
+                        comment: commentValue,
+                    }));
+
+                    // Update the state in the main page.
+                    setIPAddressTableState((state: IPAddressDataState): IPAddressDataState => ({
+                        ...state,
+                        ips: [
+                            ...state.ips.slice(0, index),
+                            {
+                                ...state.ips[index],
+                                ip_address: ipAddressValue,
+                                label: labelValue,
+                                comment: commentValue
+                            },
+                            ...state.ips.slice(index + 1)
+                        ]
+                    }));
+
+                    switchRowMode();
+                    rowEditCallback();
+                } else {
+                    const {detail}: FailedJSONResponse = await response.json();
+
+                    // We already know that there is one error that is returned.
+                    if (detail.errors[0].code === 'invalid_ip_address') {
+                        setRowState((data: RowState): RowState => ({
+                            ...data,
+                            ipAddressErrorMessage: 'Invalid IP address.'
+                        }));
+                    } else if (detail.errors[0].code === 'unavailable_label') {
+                        setRowState((data: RowState): RowState => ({
+                            ...data,
+                            labelErrorMessage: 'Label is already used.'
+                        }));
+                    }
+                }
+            } else {
+                switchRowMode();
+            }
         }
 
         setRowState((data: RowState): RowState => ({
