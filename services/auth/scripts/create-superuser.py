@@ -5,14 +5,13 @@ import sys
 from sqlalchemy import Select
 from sqlmodel import select
 
-from auth.routes import log_user_event, UserEventType
-
 src_path: Path = Path(__file__).parent.parent
 sys.path.append(str(src_path))
 
 from auth.constants import MINIMUM_PASSWORD_LENGTH
 from auth.db import get_session
 from auth.models import User, create_user
+from auth.routes import log_user_event, UserEventType
 
 
 def main():
