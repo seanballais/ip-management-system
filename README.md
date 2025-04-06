@@ -236,6 +236,7 @@ a list of possible improvements that I have identified so far:
   from bots.
 - Custom logo.
 - Better README file.
+- Better optimized pagination.
 
 ## License and Credits
 
