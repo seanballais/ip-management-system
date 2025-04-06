@@ -149,17 +149,19 @@ async function fetchIPAuditLogData(numItemsPerPage: number, pageNumber: number):
 
 async function updateIPAddressData(id: number, ipAddress: string | null, label: string | null, comment: string | null): Promise<Response> {
     let bodyData: GenericBodyData = {};
-    if (ipAddress) {
+    if (ipAddress !== null) {
         bodyData['ip_address'] = ipAddress;
     }
 
-    if (label) {
+    if (label !== null) {
         bodyData['label'] = label;
     }
 
-    if (comment) {
+    if (comment !== null) {
         bodyData['comment'] = comment;
     }
+
+    console.log(bodyData);
 
     try {
         return await patchWithTokenRefresh(`/ips/${id}`, bodyData);

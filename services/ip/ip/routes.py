@@ -135,11 +135,12 @@ async def update_ip_address(ip_address_id: int, data: UpdateIPAddressData,
         ip_address.label = data.label
         label_updated = True
 
-    if data.comment:
+    # Catch cases where the comment is an empty string.
+    if data.comment is not None:
         ip_address.comment = data.comment
         comment_updated = True
 
-    if data.ip_address or data.label or data.comment:
+    if data.ip_address or data.label or data.comment is not None:
         session.add(ip_address)
         try:
             session.commit()
@@ -333,7 +334,6 @@ def _log_event(ip_address: models.IPAddress,
         # We can do audit logging!
         ip_address_diff: IPAddressDataDiff = _diff_ip_address_data(ip_address,
                                                                    old_ip_address_data)
-        print(ip_address_diff)
 
         user_event: models.IPAddressEvent = models.IPAddressEvent(
             trigger_user_id=trigger_user_id,

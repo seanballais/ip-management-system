@@ -302,21 +302,34 @@ function IPAddressTableRow({
             }
         } else {
             let ipAddressUpdateValue: string | null = null;
+            let ipAddressUpdated: boolean = false;
             if (ipAddressValue != rowState.ipAddress) {
                 ipAddressUpdateValue = ipAddressValue;
+                ipAddressUpdated = true;
             }
 
             let labelUpdateValue: string | null = null;
+            let labelUpdated: boolean = false;
             if (labelValue != rowState.label) {
                 labelUpdateValue = labelValue;
+                labelUpdated = true;
             }
 
             let commentUpdateValue: string | null = null;
+            let commentUpdated: boolean = false;
             if (commentValue != rowState.comment) {
                 commentUpdateValue = commentValue
+                commentUpdated = true;
             }
 
-            if (ipAddressUpdateValue || labelUpdateValue || commentUpdateValue) {
+            console.log(`ipAddressUpdateValue: ${ipAddressUpdateValue}`);
+            console.log(`ipAddressUpdated: ${ipAddressUpdated}`);
+            console.log(`labelUpdateValue: ${labelUpdateValue}`);
+            console.log(`labelUpdated: ${labelUpdated}`);
+            console.log(`commentUpdateValue: ${commentUpdateValue}`);
+            console.log(`commentUpdated: ${commentUpdated}`);
+
+            if (ipAddressUpdated || labelUpdated || commentUpdated) {
                 const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
                 if (response.ok) {
                     setRowState((data: RowState): RowState => ({
