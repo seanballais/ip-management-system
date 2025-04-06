@@ -161,8 +161,6 @@ async function updateIPAddressData(id: number, ipAddress: string | null, label: 
         bodyData['comment'] = comment;
     }
 
-    console.log(bodyData);
-
     try {
         return await patchWithTokenRefresh(`/ips/${id}`, bodyData);
     } catch (e: unknown) {

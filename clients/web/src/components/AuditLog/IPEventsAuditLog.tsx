@@ -271,7 +271,7 @@ function EventCellData({event}: EventCellDataProps): React.ReactNode {
         };
     }
 
-    if (event.new_data && event.new_data.comment !== undefined) {
+    if (event.type.includes('comment')) {
         diff.changes['Comment'] = {
             oldValue: event.old_data.comment,
             newValue: event.new_data.comment
@@ -299,11 +299,27 @@ function EventCellDiff({diff}: EventCellDiffProps): React.ReactNode {
         <ul className='audit-log-diff-list'>
             {
                 Object.entries(diff.changes).map(
-                    ([attribute, delta]: [string, DataDelta]) => (
-                        <li key={diff.eventID + attribute}>
-                            {attribute}: {delta.oldValue && <>{delta.oldValue}&nbsp;&rarr;&nbsp;</>}{delta.newValue}
-                        </li>
-                    )
+                    ([attribute, delta]: [string, DataDelta]) => {
+                        if (attribute === 'Comment') {
+                            // For now, we know that only IP address comments will likely
+                            // have an empty string. So, we show empty strings for events
+                            // where comments were edited. A hack? Yes, but we have a
+                            // deadline to meet. We'll fix this later... hopefully.
+                            const oldValue: string = delta.oldValue ?? '\'\'';
+                            const newValue: string = delta.newValue ?? '\'\'';
+                            return (
+                                <li key={diff.eventID + attribute}>
+                                    {attribute}: {oldValue}&nbsp;&rarr;&nbsp;{newValue}
+                                </li>
+                            );
+                        } else {
+                            return (
+                                <li key={diff.eventID + attribute}>
+                                    {attribute}: {delta.oldValue && <>{delta.oldValue}&nbsp;&rarr;&nbsp;</>}{delta.newValue}
+                                </li>
+                            );
+                        }
+                    }
                 )
             }
         </ul>
