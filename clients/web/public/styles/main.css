@@ -127,8 +127,11 @@
     --background-colour: hsl(36, 64%, 85%);
     --dark-colour: var(--secondary-colour);
     --light-colour: hsl(0, 0%, 90%);
-    --primary-error-colour: hsl(0, 72%, 69%);
-    --secondary-error-colour: hsl(0, 100%, 81%);
+    --primary-danger-colour: hsl(0, 72%, 69%);
+    --secondary-danger-colour: hsl(0, 100%, 81%);
+
+    --primary-error-colour: var(--primary-danger-colour);
+    --secondary-error-colour: var(--secondary-danger-colour);
 
     --colour-change-factor: 7;
 
@@ -140,12 +143,15 @@
     --background-error-colour: var(--secondary-error-colour);
 
     --ui-button-colour: var(--primary-colour);
+    --ui-button-danger-colour: var(--primary-danger-colour);
     --ui-border-colour: var(--dark-colour);
     --ui-shadow-colour: var(--dark-colour);
 
     --ui-button-hover-colour: hsl(from var(--ui-button-colour) h s calc(l + var(--colour-change-factor)));
+    --ui-button-danger-hover-colour: hsl(from var(--ui-button-danger-colour) h s calc(l + var(--colour-change-factor)));
 
     --ui-button-box-shadow: 0px var(--ui-z-axis-offset) 0px 0px var(--dark-colour);
+    --ui-popover-box-shadow: calc(var(--ui-z-axis-offset) * 2) calc(var(--ui-z-axis-offset) * 2) 0px 0px var(--dark-colour);
 }
 
 * {
@@ -241,6 +247,15 @@ button {
     &:hover {
         background-color: var(--ui-button-hover-colour);
     }
+
+    &.danger-button {
+        background-color: var(--ui-button-danger-colour);
+        color: var(--light-colour);
+
+        &:hover {
+            background-color: var(--ui-button-danger-hover-colour);
+        }
+    }
 }
 
 .container {
@@ -295,6 +310,25 @@ table {
 
 table, th, td {
     border-collapse: collapse;
+}
+
+.popover-container {
+    background-color: var(--background-colour);
+    border: solid var(--ui-border-size) var(--ui-border-colour);
+    box-shadow: var(--ui-popover-box-shadow);
+
+    margin: auto;
+    padding: 1rem;
+
+    h1, p, table {
+        margin-bottom: 1rem;
+    }
+
+    .popover-action-buttons {
+        display: flex;
+        justify-content: end;
+        gap: 1rem;
+    }
 }
 
 .bold {

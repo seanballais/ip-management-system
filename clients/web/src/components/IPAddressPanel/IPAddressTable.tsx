@@ -21,6 +21,11 @@ interface TableState {
     areButtonsEnabled: boolean
 }
 
+interface DeletePopoverState {
+    targetIP?: IP;
+    deleteCallback?: CallbackFunc;
+}
+
 function IPAddressTable({
                             user,
                             ipAddressTableState,
@@ -28,13 +33,14 @@ function IPAddressTable({
                             editIPAddressTableRowCallback,
                             deleteIPAddressTableRowCallback
                         }: IPAddressTableProps): React.ReactNode {
-    const tableRef = useRef<HTMLDivElement>(null);
-
     const numPages: number = Math.ceil((ipAddressTableState.numTotalItems ?? 0) / MAX_NUM_ITEMS_PER_PAGE);
+
+    const tableRef = useRef<HTMLDivElement>(null);
     let [state, setState] = useState<TableState>({
         isLoadingData: false,
         areButtonsEnabled: true
     });
+    let [deletePopoverState, setDeletePopoverState] = useState<DeletePopoverState>({});
 
     function handlePreviousButtonClick(): void {
         if (isFirstPage()) {
@@ -110,41 +116,101 @@ function IPAddressTable({
     }
 
     return (
-        <div
-            className='ip-address-table-container max-width-initial'
-            ref={tableRef}>
-            <h1>IP Addresses</h1>
+        <>
+            <div
+                className='ip-address-table-container max-width-initial'
+                ref={tableRef}>
+                <h1>IP Addresses</h1>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope='col'>IP Address</th>
+                        <th scope='col'>Label</th>
+                        <th scope='col'>Comment</th>
+                        <th scope='col'>Added by</th>
+                        <th scope='col'>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <IPAddressTableRows parentState={state}
+                                        dataState={ipAddressTableState}
+                                        user={user}
+                                        rowEditCallback={editIPAddressTableRowCallback}
+                                        rowDeleteCallback={deleteIPAddressTableRowCallback}
+                                        setIPAddressTableState={setIPAddressTableState}
+                                        setDeletePopoverState={setDeletePopoverState}/>
+                    </tbody>
+                </table>
+                <div className='row pagination-row'>
+                    <button
+                        className={isFirstPage() ? 'previous-button invisible' : 'previous-button'}
+                        disabled={!state.areButtonsEnabled}
+                        onClick={handlePreviousButtonClick}>&larr; Previous
+                    </button>
+                    <div
+                        className='page-number'>{ipAddressTableState.pageNumber + 1}/{numPages}</div>
+                    <button
+                        className={isLastPage() ? 'next-button invisible' : 'next-button'}
+                        disabled={!state.areButtonsEnabled}
+                        onClick={handleNextButtonClick}>Next &rarr;</button>
+                </div>
+            </div>
+            <DeleteConfirmationPopover
+                deletePopoverState={deletePopoverState}/>
+        </>
+    );
+}
+
+interface DeleteConfirmationPopoverProps {
+    deletePopoverState: DeletePopoverState;
+}
+
+function DeleteConfirmationPopover({deletePopoverState}: DeleteConfirmationPopoverProps): React.ReactNode {
+    const popoverRef = useRef<HTMLDivElement>(null);
+
+    function hidePopover(): void {
+        popoverRef.current?.hidePopover();
+    }
+
+    function performDeleteAction(): void {
+        if (deletePopoverState.deleteCallback) {
+            deletePopoverState.deleteCallback();
+        }
+
+        hidePopover();
+    }
+
+    return (
+        <div ref={popoverRef} id='delete-confirmation-popover'
+             className='popover-container'
+             popover='auto'>
+            <h1>Delete IP Address</h1>
+            <p>The following IP address will be deleted:</p>
             <table>
                 <thead>
                 <tr>
                     <th scope='col'>IP Address</th>
+                    <th scope='col'>Created on</th>
                     <th scope='col'>Label</th>
                     <th scope='col'>Comment</th>
                     <th scope='col'>Added by</th>
-                    <th scope='col'>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <IPAddressTableRows parentState={state}
-                                    dataState={ipAddressTableState}
-                                    user={user}
-                                    rowEditCallback={editIPAddressTableRowCallback}
-                                    rowDeleteCallback={deleteIPAddressTableRowCallback}
-                                    setIPAddressTableState={setIPAddressTableState}/>
+                <tr>
+                    <td>{deletePopoverState.targetIP?.ip_address}</td>
+                    <td>{deletePopoverState.targetIP?.created_on}</td>
+                    <td>{deletePopoverState.targetIP?.label}</td>
+                    <td>{deletePopoverState.targetIP?.comment}</td>
+                    <td>@{deletePopoverState.targetIP?.recorder.username}</td>
+                </tr>
                 </tbody>
             </table>
-            <div className='row pagination-row'>
-                <button
-                    className={isFirstPage() ? 'previous-button invisible' : 'previous-button'}
-                    disabled={!state.areButtonsEnabled}
-                    onClick={handlePreviousButtonClick}>&larr; Previous
+            <div className='popover-action-buttons'>
+                <button onClick={hidePopover}>Cancel</button>
+                <button className='danger-button'
+                        onClick={performDeleteAction}>Delete
                 </button>
-                <div
-                    className='page-number'>{ipAddressTableState.pageNumber + 1}/{numPages}</div>
-                <button
-                    className={isLastPage() ? 'next-button invisible' : 'next-button'}
-                    disabled={!state.areButtonsEnabled}
-                    onClick={handleNextButtonClick}>Next &rarr;</button>
             </div>
         </div>
     );
@@ -157,6 +223,7 @@ interface IPAddressTableRowsState {
     rowEditCallback: CallbackFunc;
     rowDeleteCallback: CallbackFunc;
     setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
+    setDeletePopoverState: React.Dispatch<React.SetStateAction<DeletePopoverState>>;
 }
 
 function IPAddressTableRows({
@@ -165,7 +232,8 @@ function IPAddressTableRows({
                                 dataState,
                                 rowEditCallback,
                                 rowDeleteCallback,
-                                setIPAddressTableState
+                                setIPAddressTableState,
+                                setDeletePopoverState
                             }: IPAddressTableRowsState): React.ReactNode {
     if (dataState.ips.length === 0) {
         if (parentState.isLoadingData) {
@@ -186,13 +254,15 @@ function IPAddressTableRows({
     return (
         dataState.ips.map((ip: IP, index: number): React.ReactNode => (
             <IPAddressTableRow key={ip.id} index={index} id={ip.id}
+                               created_on={ip.created_on}
                                ipAddress={ip.ip_address}
                                label={ip.label} comment={ip.comment}
                                recorder={ip.recorder}
                                user={user}
                                rowEditCallback={rowEditCallback}
                                rowDeleteCallback={rowDeleteCallback}
-                               setIPAddressTableState={setIPAddressTableState}/>
+                               setIPAddressTableState={setIPAddressTableState}
+                               setDeletePopoverState={setDeletePopoverState}/>
         ))
     );
 }
@@ -200,6 +270,7 @@ function IPAddressTableRows({
 interface RowProps {
     index: number,
     id: number,
+    created_on: number,
     ipAddress: string,
     label: string;
     comment: string;
@@ -207,7 +278,8 @@ interface RowProps {
     user: User;
     rowEditCallback: CallbackFunc;
     rowDeleteCallback: CallbackFunc;
-    setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>
+    setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
+    setDeletePopoverState: React.Dispatch<React.SetStateAction<DeletePopoverState>>;
 }
 
 enum RowMode {
@@ -231,13 +303,15 @@ interface RowState {
 function IPAddressTableRow({
                                index,
                                id,
+                               created_on,
                                ipAddress,
                                label,
                                comment, recorder,
                                user,
                                rowEditCallback,
                                rowDeleteCallback,
-                               setIPAddressTableState
+                               setIPAddressTableState,
+                               setDeletePopoverState
                            }: RowProps): React.ReactNode {
     const ipAddressInputRef = useRef<HTMLInputElement>(null);
     const labelInputRef = useRef<HTMLInputElement>(null);
@@ -253,6 +327,23 @@ function IPAddressTableRow({
         isCommentInputEnabled: true,
         areButtonsEnabled: true
     });
+
+    function handleDeleteButtonClick(): void {
+        setDeletePopoverState((state: DeletePopoverState): DeletePopoverState => ({
+            ...state,
+            targetIP: {
+                id: id,
+                created_on: created_on,
+                ip_address: rowState.ipAddress,
+                label: rowState.label,
+                comment: rowState.comment,
+                recorder: recorder
+            },
+            deleteCallback: (): void => {
+                void handleDeleteIPAddress();
+            }
+        }));
+    }
 
     async function handleUpdateIPAddress(): Promise<void> {
         setRowState((data: RowState): RowState => ({
@@ -321,13 +412,6 @@ function IPAddressTableRow({
                 commentUpdateValue = commentValue
                 commentUpdated = true;
             }
-
-            console.log(`ipAddressUpdateValue: ${ipAddressUpdateValue}`);
-            console.log(`ipAddressUpdated: ${ipAddressUpdated}`);
-            console.log(`labelUpdateValue: ${labelUpdateValue}`);
-            console.log(`labelUpdated: ${labelUpdated}`);
-            console.log(`commentUpdateValue: ${commentUpdateValue}`);
-            console.log(`commentUpdated: ${commentUpdated}`);
 
             if (ipAddressUpdated || labelUpdated || commentUpdated) {
                 const response: Response = await updateIPAddressData(id, ipAddressUpdateValue, labelUpdateValue, commentUpdateValue);
@@ -451,7 +535,9 @@ function IPAddressTableRow({
                                 {
                                     (user.is_superuser)
                                         ? <button
-                                            onClick={handleDeleteIPAddress}>Delete</button>
+                                            className='danger-button'
+                                            popoverTarget='delete-confirmation-popover'
+                                            onClick={handleDeleteButtonClick}>Delete</button>
                                         : null
                                 }
                             </td>
