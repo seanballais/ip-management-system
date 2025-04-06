@@ -445,7 +445,7 @@ function IPAddressTableRow({
                                     className='form-group'>@{recorder.username}</div>
                             </th>
                             <td>
-                                <div className='form-group'>
+                                <div className='margin-bottom-1rem'>
                                     <button className='margin-right-1rem'
                                             disabled={!rowState.areButtonsEnabled}
                                             onClick={handleUpdateIPAddress}>Save
