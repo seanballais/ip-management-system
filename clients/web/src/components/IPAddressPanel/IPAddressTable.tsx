@@ -389,7 +389,7 @@ function IPAddressTableRow({
                             <th scope='row'>@{recorder.username}</th>
                             <td>
                                 {
-                                    (user.id == recorder.id)
+                                    (user.id == recorder.id || user.is_superuser)
                                         ? <button className='margin-right-1rem'
                                                   onClick={switchRowMode}>Edit</button>
                                         : null

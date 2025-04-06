@@ -60,7 +60,7 @@ class IPAddressData:
             d['label'] = self.label
 
         if self.comment:
-            d['comment'] = self.label
+            d['comment'] = self.comment
 
         return d
 
@@ -333,6 +333,7 @@ def _log_event(ip_address: models.IPAddress,
         # We can do audit logging!
         ip_address_diff: IPAddressDataDiff = _diff_ip_address_data(ip_address,
                                                                    old_ip_address_data)
+        print(ip_address_diff)
 
         user_event: models.IPAddressEvent = models.IPAddressEvent(
             trigger_user_id=trigger_user_id,
