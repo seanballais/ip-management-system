@@ -129,7 +129,8 @@ function IPAddressTable({
                                     dataState={ipAddressTableState}
                                     user={user}
                                     rowEditCallback={editIPAddressTableRowCallback}
-                                    rowDeleteCallback={deleteIPAddressTableRowCallback}/>
+                                    rowDeleteCallback={deleteIPAddressTableRowCallback}
+                                    setIPAddressTableState={setIPAddressTableState}/>
                 </tbody>
             </table>
             <div className='row pagination-row'>
@@ -155,6 +156,7 @@ interface IPAddressTableRowsState {
     dataState: IPAddressDataState;
     rowEditCallback: CallbackFunc;
     rowDeleteCallback: CallbackFunc;
+    setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>;
 }
 
 function IPAddressTableRows({
@@ -162,7 +164,8 @@ function IPAddressTableRows({
                                 parentState,
                                 dataState,
                                 rowEditCallback,
-                                rowDeleteCallback
+                                rowDeleteCallback,
+                                setIPAddressTableState
                             }: IPAddressTableRowsState): React.ReactNode {
     if (dataState.ips.length === 0) {
         if (parentState.isLoadingData) {
@@ -181,18 +184,21 @@ function IPAddressTableRows({
     }
 
     return (
-        dataState.ips.map((ip: IP): React.ReactNode => (
-            <IPAddressTableRow key={ip.id} id={ip.id} ipAddress={ip.ip_address}
+        dataState.ips.map((ip: IP, index: number): React.ReactNode => (
+            <IPAddressTableRow key={ip.id} index={index} id={ip.id}
+                               ipAddress={ip.ip_address}
                                label={ip.label} comment={ip.comment}
                                recorder={ip.recorder}
                                user={user}
                                rowEditCallback={rowEditCallback}
-                               rowDeleteCallback={rowDeleteCallback}/>
+                               rowDeleteCallback={rowDeleteCallback}
+                               setIPAddressTableState={setIPAddressTableState}/>
         ))
     );
 }
 
 interface RowProps {
+    index: number,
     id: number,
     ipAddress: string,
     label: string;
@@ -201,6 +207,7 @@ interface RowProps {
     user: User;
     rowEditCallback: CallbackFunc;
     rowDeleteCallback: CallbackFunc;
+    setIPAddressTableState: React.Dispatch<React.SetStateAction<IPAddressDataState>>
 }
 
 enum RowMode {
@@ -222,13 +229,15 @@ interface RowState {
 }
 
 function IPAddressTableRow({
+                               index,
                                id,
                                ipAddress,
                                label,
                                comment, recorder,
                                user,
                                rowEditCallback,
-                               rowDeleteCallback
+                               rowDeleteCallback,
+                               setIPAddressTableState
                            }: RowProps): React.ReactNode {
     const ipAddressInputRef = useRef<HTMLInputElement>(null);
     const labelInputRef = useRef<HTMLInputElement>(null);
@@ -301,6 +310,22 @@ function IPAddressTableRow({
                     label: labelValue,
                     comment: commentValue,
                 }));
+
+                // Update the state in the main page.
+                setIPAddressTableState((state: IPAddressDataState): IPAddressDataState => ({
+                    ...state,
+                    ips: [
+                        ...state.ips.slice(0, index),
+                        {
+                            ...state.ips[index],
+                            ip_address: ipAddressValue,
+                            label: labelValue,
+                            comment: commentValue
+                        },
+                        ...state.ips.slice(index + 1)
+                    ]
+                }));
+
                 switchRowMode();
                 rowEditCallback();
             } else {
