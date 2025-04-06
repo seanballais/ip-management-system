@@ -41,7 +41,7 @@ function AddIPAddressForm({callback}: Props): React.ReactNode {
     async function handleAddIPAddress(event: React.SyntheticEvent<HTMLFormElement, SubmitEvent>): Promise<boolean> {
         event.preventDefault();
 
-        if (!formData.ipAddress || !formData.label || !formData.comment) {
+        if (!formData.ipAddress || !formData.label) {
             return false;
         }
 
