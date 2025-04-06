@@ -113,8 +113,9 @@ function IPEventsAuditLog({
                     <th scope='col'>Recorded On (UTC)</th>
                     <th scope='col'>IP Address</th>
                     <th scope='col'>Label</th>
+                    <th scope='col'>Created By</th>
                     <th scope='col'>Event</th>
-                    <th scope='col'>User Responsible</th>
+                    <th scope='col'>Event Triggered By</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -147,13 +148,13 @@ function IPAuditLogRows({
         if (parentState.isLoadingData) {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={5}>Loading data...</td>
+                    <td colSpan={6}>Loading data...</td>
                 </tr>
             );
         } else {
             return (
                 <tr className='text-align-center'>
-                    <td colSpan={5}>No user event logged.</td>
+                    <td colSpan={6}>No user event logged.</td>
                 </tr>
             );
         }
@@ -165,6 +166,7 @@ function IPAuditLogRows({
                 <td>{event.recorded_on}</td>
                 <td>{event.ip.ip_address}</td>
                 <td>{event.ip.label}</td>
+                <td>@{event.ip.recorder.username}</td>
                 <td>
                     <EventCellData event={event}/>
                 </td>
