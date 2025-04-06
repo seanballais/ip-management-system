@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState} from "react";
 import {
-    APIError,
+    APIError, MINIMUM_PASSWORD_LENGTH,
     put, User
 } from "../../utils/api.ts";
 import {
@@ -9,8 +9,9 @@ import {
     REFRESH_TOKEN_STORAGE_NAME
 } from "../../utils/tokens.ts";
 import {
-    FormInputErrorMessage
-} from "../FormInputErrorMessage/FormInputErrorMessage.tsx";
+    FormInputMessage,
+    FormInputMessageType
+} from "../FormInputMessage/FormInputMessage.tsx";
 
 interface RegistrationFormState {
     username: string;
@@ -99,10 +100,20 @@ function Registration(): React.ReactNode {
                     ...data,
                     usernameInputErrorMessage: 'Username is already taken.'
                 }));
+            } else if (detail.errors[0].code === 'invalid_username') {
+                setFormData((data: RegistrationFormState): RegistrationFormState => ({
+                    ...data,
+                    usernameInputErrorMessage: 'Username must only have letters, numbers, periods, and underscores.'
+                }));
             } else if (detail.errors[0].code === 'mismatched_passwords') {
                 setFormData((data: RegistrationFormState): RegistrationFormState => ({
                     ...data,
                     passwordInputErrorMessage: 'The passwords do not match.'
+                }));
+            } else if (detail.errors[0].code === 'short_password') {
+                setFormData((data: RegistrationFormState): RegistrationFormState => ({
+                    ...data,
+                    passwordInputErrorMessage: 'Password must have a minimum length of 12.'
                 }));
             }
 
@@ -137,13 +148,15 @@ function Registration(): React.ReactNode {
                            onChange={handleChange}
                            disabled={!formData.isUsernameInputEnabled}
                            required/>
-                    <FormInputErrorMessage targetInput='username'
-                                           message={formData.usernameInputErrorMessage}/>
+                    <FormInputMessage targetInput='username'
+                                      type={FormInputMessageType.Error}
+                                      message={formData.usernameInputErrorMessage}/>
                 </div>
                 <div className='form-group'>
                     <label htmlFor='password'>Password</label>
                     <input type='password' placeholder='Password'
                            name='password1'
+                           minLength={MINIMUM_PASSWORD_LENGTH}
                            onChange={handleChange}
                            disabled={!formData.isPassword1InputEnabled}
                            required/>
@@ -152,11 +165,13 @@ function Registration(): React.ReactNode {
                     <label htmlFor='password'>Confirm Password</label>
                     <input type='password' placeholder='Confirm Password'
                            name='password2'
+                           minLength={MINIMUM_PASSWORD_LENGTH}
                            onChange={handleChange}
                            disabled={!formData.isPassword2InputEnabled}
                            required/>
-                    <FormInputErrorMessage targetInput='password2'
-                                           message={formData.passwordInputErrorMessage}/>
+                    <FormInputMessage targetInput='password2'
+                                      type={FormInputMessageType.Error}
+                                      message={formData.passwordInputErrorMessage}/>
                 </div>
                 <button type='submit'
                         disabled={!formData.isSubmitButtonEnabled}>Register

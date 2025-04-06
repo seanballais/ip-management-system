@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -10,6 +11,7 @@ from sqlalchemy.sql.elements import BinaryExpression
 from sqlmodel import Session, select, or_, col
 
 from . import models
+from .constants import MINIMUM_PASSWORD_LENGTH
 from .db import get_session
 from .encode import get_user_dict
 from .models import create_user
@@ -30,8 +32,10 @@ from .tokens import (
 
 
 class RouteErrorCode(Enum):
-    MISMATCHED_PASSWORDS = 'mismatched_passwords'
     UNAVAILABLE_USERNAME = 'unavailable_username'
+    INVALID_USERNAME = 'invalid_username'
+    SHORT_PASSWORD = 'short_password'
+    MISMATCHED_PASSWORDS = 'mismatched_passwords'
     WRONG_CREDENTIALS = 'wrong_credentials'
     INVALID_ACCESS_TOKEN = 'invalid_access_token'
     INVALID_REFRESH_TOKEN = 'invalid_refresh_token'
@@ -50,9 +54,19 @@ router: APIRouter = APIRouter()
 @router.put('/register')
 async def register(data: RegistrationData,
                    session: Session = Depends(get_session)) -> dict:
+    # Based on:
+    # - https://www.reddit.com/r/learnpython/comments/jepepl/username_regex/
+    if not re.fullmatch('[\\w.]+', data.username):
+        raise _get_error_details_exception(422,
+                                           RouteErrorCode.INVALID_USERNAME)
+
     if data.password1 != data.password2:
         raise _get_error_details_exception(422,
                                            RouteErrorCode.MISMATCHED_PASSWORDS)
+
+    if len(data.password1) < MINIMUM_PASSWORD_LENGTH:
+        raise _get_error_details_exception(422,
+                                           RouteErrorCode.SHORT_PASSWORD)
 
     try:
         user: models.User = create_user(data.username, data.password1, False,

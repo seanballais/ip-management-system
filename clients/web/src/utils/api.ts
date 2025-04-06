@@ -5,6 +5,7 @@ import {
 
 const API_BASE_URL: string = 'http://localhost:8083';
 const MAX_NUM_ITEMS_PER_PAGE: number = 25;
+const MINIMUM_PASSWORD_LENGTH: number = 12;
 
 enum HTTPMethod {
     GET = 'GET',
@@ -344,6 +345,7 @@ async function fetchAPI(path: string, method: HTTPMethod, body: string | null, q
 export {
     HTTPMethod,
     MAX_NUM_ITEMS_PER_PAGE,
+    MINIMUM_PASSWORD_LENGTH,
     fetchIPAddressData,
     fetchIPAuditLogData,
     fetchUserAuditLogData,

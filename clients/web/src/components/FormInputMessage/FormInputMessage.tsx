@@ -1,4 +1,5 @@
 import * as React from "react";
+import './FormInputMessage.css';
 
 enum FormInputMessageType {
     Success,
