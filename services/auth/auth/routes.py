@@ -75,7 +75,7 @@ async def register(data: RegistrationData,
         raise _get_error_details_exception(409,
                                            RouteErrorCode.UNAVAILABLE_USERNAME)
 
-    _log_user_event(user, UserEventType.REGISTER, session)
+    log_user_event(user, UserEventType.REGISTER, session)
 
     # Create access and refresh tokens.
     user_data: dict = get_user_dict(user)
@@ -105,7 +105,7 @@ async def login(data: LoginData,
         user_tokens: dict = _get_user_tokens(user_data)
 
         # Log it!
-        _log_user_event(user, UserEventType.LOGIN, session)
+        log_user_event(user, UserEventType.LOGIN, session)
 
         return {
             'data': {
@@ -155,7 +155,7 @@ async def logout(data: LogoutData,
     statement: Select = select(models.User).where(models.User.id == user_id)
     user: models.User = session.exec(statement).first()
     if user:
-        _log_user_event(user, UserEventType.LOGOUT, session)
+        log_user_event(user, UserEventType.LOGOUT, session)
 
     return {
         'data': {
@@ -286,8 +286,8 @@ async def audit(data: AuditData,
     }
 
 
-def _log_user_event(user: models.User, event_type: UserEventType,
-                    session: Session = None):
+def log_user_event(user: models.User, event_type: UserEventType,
+                   session: Session = None):
     if session is None:
         session = next(get_session())
 

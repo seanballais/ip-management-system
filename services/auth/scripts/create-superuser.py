@@ -5,6 +5,8 @@ import sys
 from sqlalchemy import Select
 from sqlmodel import select
 
+from auth.routes import log_user_event, UserEventType
+
 src_path: Path = Path(__file__).parent.parent
 sys.path.append(str(src_path))
 
@@ -36,7 +38,8 @@ def main():
 
         if password == confirm_password:
             print(f'⚒️ Creating user (@{username})...')
-            create_user(username, password, True, session)
+            user: User = create_user(username, password, True, session)
+            log_user_event(user, UserEventType.REGISTER, session)
             print('🎉 Done!')
         else:
             print('❌ The passwords you entered do not match. '
