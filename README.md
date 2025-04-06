@@ -1,11 +1,12 @@
-# TechLint Examination Project: Web-Based IP Address Management System
+# Job Application Examination Project: Web-Based IP Address Management System
 
 ![img.png](docs/preview.png)
 
 This project is a system built by [Sean Ballais](https://seanballais.com) as
-part of his technical examination at TechLint. It lets you manage IP addresses
-from different users, while also tracking changes made to the IP addresses by
-users and user actions like logins, logouts, and registrations.
+part of his technical examination as part of a job application. It lets you
+manage IP addresses from different users, while also tracking changes made to
+the IP addresses by users and user actions like logins, logouts, and
+registrations.
 
 ## Built With
 
@@ -44,8 +45,8 @@ current working directory:
 
 ```bash
 $ cd /path/to/working/directory/
-$ git clone https://github.com/seanballais/techlint-interview.git
-$ cd techlint-interview/
+$ git clone https://github.com/seanballais/ip-management-system.git
+$ cd ip-management-system/
 ```
 
 We will then build and run our containers.

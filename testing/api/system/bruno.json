@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "techlint_examination",
+  "name": "system",
   "type": "collection",
   "ignore": [
     "node_modules",
